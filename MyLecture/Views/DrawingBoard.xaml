@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:MyLecture.Views"
+    xmlns:controls="using:MyLecture.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -28,18 +29,25 @@
             </Viewbox>
         </Button>
 
-
-        <InkToolbar TargetInkCanvas="{x:Bind MainCanvas}"
+        <InkToolbar x:Name="MainInkToolbar" 
+                    TargetInkCanvas="{x:Bind MainCanvas}"
                     RelativePanel.AlignHorizontalCenterWithPanel="True"
                     RelativePanel.AlignBottomWithPanel="True">
-            <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" Checked="ToggleTouchInkingButton_Checked" Unchecked="ToggleTouchInkingButton_Unchecked">
+
+            <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" 
+                                          Checked="ToggleTouchInkingButton_Checked" 
+                                          Unchecked="ToggleTouchInkingButton_Unchecked">
                 <SymbolIcon Symbol="TouchPointer" />
             </InkToolbarCustomToggleButton>
-            <InkToolbarCustomToggleButton x:Name="ToggleBackgroundColor" Checked="ToggleBackgroundColor_Checked" Unchecked="ToggleBackgroundColor_Unchecked">
+            <InkToolbarCustomToggleButton x:Name="ToggleBackgroundColor" 
+                                          Checked="ToggleBackgroundColor_Checked" 
+                                          Unchecked="ToggleBackgroundColor_Unchecked">
                 <SymbolIcon Symbol="Page" />
             </InkToolbarCustomToggleButton>
         </InkToolbar>
 
-
+        <controls:SlidesViewControl RelativePanel.AlignTopWithPanel="True"
+                                    RelativePanel.AlignRightWithPanel="True"
+                                    RelativePanel.AlignBottomWithPanel="True"/>
     </RelativePanel>
 </Page>

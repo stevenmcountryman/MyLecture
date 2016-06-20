@@ -7,6 +7,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
 using Windows.UI.Core;
+using Windows.UI.Input.Inking;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -78,12 +79,45 @@ namespace MyLecture.Views
             {
                 this.MainPanel.Background = this.whiteColor;
                 this.SlideViewButton.Foreground = this.blackColor;
+
+                var allStrokes = this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes();
+                foreach (var stroke in allStrokes)
+                {
+                    if (stroke.DrawingAttributes.Color == this.whiteColor.Color)
+                    {
+                        this.modifyStrokeColor(stroke, this.blackColor.Color);
+                    }
+                }
             }
             else
             {
                 this.MainPanel.Background = this.blackColor;
                 this.SlideViewButton.Foreground = this.whiteColor;
+
+                var allStrokes = this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes();
+                foreach (var stroke in allStrokes)
+                {
+                    if (stroke.DrawingAttributes.Color == this.blackColor.Color)
+                    {
+                        this.modifyStrokeColor(stroke, this.whiteColor.Color);
+                    }
+                }
             }
+        }
+
+        private void modifyStrokeColor(InkStroke stroke, Color color)
+        {
+            var strokeClone = stroke.Clone();
+            stroke.DrawingAttributes = new InkDrawingAttributes()
+            {
+                Color = color,
+                FitToCurve = strokeClone.DrawingAttributes.FitToCurve,
+                DrawAsHighlighter = strokeClone.DrawingAttributes.DrawAsHighlighter,
+                IgnorePressure = strokeClone.DrawingAttributes.IgnorePressure,
+                PenTip = strokeClone.DrawingAttributes.PenTip,
+                PenTipTransform = strokeClone.DrawingAttributes.PenTipTransform,
+                Size = strokeClone.DrawingAttributes.Size
+            };
         }
 
         #endregion
