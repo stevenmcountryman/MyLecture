@@ -15,16 +15,6 @@
                    RelativePanel.AlignRightWithPanel="True"
                    RelativePanel.AlignTopWithPanel="True"/>
         
-        <Button x:Name="BoardColorButton"
-                Margin="24"
-                Padding="0"
-                Background="Black"
-                Width="40"
-                Height="40"
-                BorderThickness="0"
-                RelativePanel.AlignTopWithPanel="True"
-                RelativePanel.AlignLeftWithPanel="True" Click="BoardColorButton_Click"/>
-
         <Button x:Name="SlideViewButton"                
                 Margin="24"
                 Padding="0"
@@ -45,6 +35,11 @@
             <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" Checked="ToggleTouchInkingButton_Checked" Unchecked="ToggleTouchInkingButton_Unchecked">
                 <SymbolIcon Symbol="TouchPointer" />
             </InkToolbarCustomToggleButton>
+            <InkToolbarCustomToggleButton x:Name="ToggleBackgroundColor" Checked="ToggleBackgroundColor_Checked" Unchecked="ToggleBackgroundColor_Unchecked">
+                <SymbolIcon Symbol="Page" />
+            </InkToolbarCustomToggleButton>
         </InkToolbar>
+
+
     </RelativePanel>
 </Page>

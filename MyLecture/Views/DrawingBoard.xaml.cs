@@ -32,26 +32,7 @@ namespace MyLecture.Views
             this.InitializeComponent();
         }
 
-        private void BoardColorButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.invertUIColors();
-        }
-
-        private void invertUIColors()
-        {
-            isCanvasWhite = !isCanvasWhite;
-
-            if (isCanvasWhite)
-            {
-                this.MainPanel.Background = this.whiteColor;
-                this.SlideViewButton.Foreground = this.BoardColorButton.Background = this.blackColor;
-            }
-            else
-            {
-                this.MainPanel.Background = this.blackColor;
-                this.SlideViewButton.Foreground = this.BoardColorButton.Background = this.whiteColor;
-            }
-        }
+        #region InkToolbar Custom Actions
 
         private void ToggleTouchInkingButton_Checked(object sender, RoutedEventArgs e)
         {
@@ -65,6 +46,20 @@ namespace MyLecture.Views
             this.toggleTouchInking();
         }
 
+        private void ToggleBackgroundColor_Checked(object sender, RoutedEventArgs e)
+        {
+            this.isCanvasWhite = false;
+            this.invertUIColors();
+        }
+
+        private void ToggleBackgroundColor_Unchecked(object sender, RoutedEventArgs e)
+        {
+            this.isCanvasWhite = true;
+            this.invertUIColors();
+        }
+
+        #region InkToolbar Custom Helpers
+
         private void toggleTouchInking()
         {
             if (this.canTouchInk)
@@ -76,5 +71,23 @@ namespace MyLecture.Views
                 this.MainCanvas.InkPresenter.InputDeviceTypes = CoreInputDeviceTypes.Pen;
             }
         }
+
+        private void invertUIColors()
+        {
+            if (isCanvasWhite)
+            {
+                this.MainPanel.Background = this.whiteColor;
+                this.SlideViewButton.Foreground = this.blackColor;
+            }
+            else
+            {
+                this.MainPanel.Background = this.blackColor;
+                this.SlideViewButton.Foreground = this.whiteColor;
+            }
+        }
+
+        #endregion
+
+        #endregion
     }
 }
