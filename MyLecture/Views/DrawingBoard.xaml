@@ -38,8 +38,13 @@
             </Viewbox>
         </Button>
 
+
         <InkToolbar TargetInkCanvas="{x:Bind MainCanvas}"
                     RelativePanel.AlignHorizontalCenterWithPanel="True"
-                    RelativePanel.AlignBottomWithPanel="True"/>
+                    RelativePanel.AlignBottomWithPanel="True">
+            <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" Checked="ToggleTouchInkingButton_Checked" Unchecked="ToggleTouchInkingButton_Unchecked">
+                <SymbolIcon Symbol="TouchPointer" />
+            </InkToolbarCustomToggleButton>
+        </InkToolbar>
     </RelativePanel>
 </Page>

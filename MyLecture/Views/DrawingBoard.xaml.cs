@@ -6,6 +6,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -24,6 +25,7 @@ namespace MyLecture.Views
         private Boolean isCanvasWhite = true;
         private SolidColorBrush whiteColor = new SolidColorBrush(Colors.White);
         private SolidColorBrush blackColor = new SolidColorBrush(Colors.Black);
+        private bool canTouchInk = false;
 
         public DrawingBoard()
         {
@@ -48,6 +50,30 @@ namespace MyLecture.Views
             {
                 this.MainPanel.Background = this.blackColor;
                 this.SlideViewButton.Foreground = this.BoardColorButton.Background = this.whiteColor;
+            }
+        }
+
+        private void ToggleTouchInkingButton_Checked(object sender, RoutedEventArgs e)
+        {
+            this.canTouchInk = true;
+            this.toggleTouchInking();
+        }
+
+        private void ToggleTouchInkingButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            this.canTouchInk = false;
+            this.toggleTouchInking();
+        }
+
+        private void toggleTouchInking()
+        {
+            if (this.canTouchInk)
+            {
+                this.MainCanvas.InkPresenter.InputDeviceTypes = CoreInputDeviceTypes.Touch | CoreInputDeviceTypes.Mouse | CoreInputDeviceTypes.Pen;
+            }
+            else
+            {
+                this.MainCanvas.InkPresenter.InputDeviceTypes = CoreInputDeviceTypes.Pen;
             }
         }
     }
