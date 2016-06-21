@@ -33,7 +33,12 @@
                     TargetInkCanvas="{x:Bind MainCanvas}"
                     RelativePanel.AlignHorizontalCenterWithPanel="True"
                     RelativePanel.AlignBottomWithPanel="True">
-
+            <InkToolbarCustomPenButton x:Name="SelectionTool">
+                <InkToolbarCustomPenButton.CustomPen>
+                    <controls:CalligraphicPen/>
+                </InkToolbarCustomPenButton.CustomPen>
+                <SymbolIcon Symbol="SelectAll" />
+            </InkToolbarCustomPenButton>
             <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" 
                                           Checked="ToggleTouchInkingButton_Checked" 
                                           Unchecked="ToggleTouchInkingButton_Unchecked">
@@ -45,9 +50,5 @@
                 <SymbolIcon Symbol="Page" />
             </InkToolbarCustomToggleButton>
         </InkToolbar>
-
-        <controls:SlidesViewControl RelativePanel.AlignTopWithPanel="True"
-                                    RelativePanel.AlignRightWithPanel="True"
-                                    RelativePanel.AlignBottomWithPanel="True"/>
     </RelativePanel>
 </Page>
