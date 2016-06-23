@@ -69,16 +69,29 @@ namespace MyLecture.Controls
             {
                 this.pointer = 0;
                 var rect = this.SelectionCanvas.Children[0] as Rectangle;
+                var leftEdge = Canvas.GetLeft(rect);
+                var rightEdge = Canvas.GetLeft(rect) + rect.Width;
+                var topEdge = Canvas.GetTop(rect);
+                var botEdge = Canvas.GetTop(rect) + rect.Height;
                 this.selectionPoints = new List<Point>()
                 {
-                    new Point(Canvas.GetLeft(rect), Canvas.GetTop(rect)),
-                    new Point(Canvas.GetLeft(rect), Canvas.GetTop(rect) + rect.Height),
-                    new Point(Canvas.GetLeft(rect) + rect.Width, Canvas.GetTop(rect) + rect.Height),
-                    new Point(Canvas.GetLeft(rect) + rect.Width, Canvas.GetTop(rect))
+                    new Point(leftEdge, topEdge),
+                    new Point(leftEdge, botEdge),
+                    new Point(rightEdge, botEdge),
+                    new Point(rightEdge, topEdge)
                 };
 
-                this.SelectionMade(this, new EventArgs());
+                this.SelectionCanvas.PointerPressed -= SelectionCanvas_PointerPressed;
+                this.SelectionCanvas.PointerMoved -= SelectionCanvas_PointerMoved;
+                this.SelectionCanvas.PointerReleased -= SelectionCanvas_PointerReleased;
+
+                this.SelectionMade(this, new EventArgs());                
             }
+        }
+
+        public void showCopyMovePopup(CopyPasteMovePopup cpmPopup)
+        {
+            this.SelectionCanvas.Children.Add(cpmPopup);
         }
     }
 }

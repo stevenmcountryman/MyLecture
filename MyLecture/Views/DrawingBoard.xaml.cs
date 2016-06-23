@@ -139,14 +139,80 @@ namespace MyLecture.Views
                 this.ToggleTouchInkingButton.IsChecked = this.canTouchInk;
             }
         }
-
         private void SelectionLayer_SelectionMade(object sender, EventArgs e)
         {
             var selectionPoints = (sender as SelectionLayer).selectionPoints;
             this.MainCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(selectionPoints);
-            this.MainCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
-            this.MainCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(50,50));
+            var leftEdge = selectionPoints[0].X;
+            var rightEdge = selectionPoints[2].X;
+            var topEdge = selectionPoints[0].Y;
+            var botEdge = selectionPoints[1].Y;
+            var selectionWidth = rightEdge - leftEdge;
+            var selectionHeight = botEdge - topEdge;
+
+            CopyPasteMovePopup cpmpopup = new CopyPasteMovePopup();
+            Canvas.SetLeft(cpmpopup, (leftEdge + (selectionWidth / 2) - 56));
+            Canvas.SetTop(cpmpopup, topEdge + (selectionHeight / 2) - 14);
+
+            cpmpopup.CopySelection += Cpmpopup_CopySelection;
+            cpmpopup.MoveSelection += Cpmpopup_MoveSelection;
+            cpmpopup.ClearSelection += Cpmpopup_ClearSelection;
+
+            (sender as SelectionLayer).showCopyMovePopup(cpmpopup);
+        }
+
+        private void Cpmpopup_ClearSelection(object sender, EventArgs e)
+        {
             this.injectSelectionLayer();
+        }
+
+        private void Cpmpopup_MoveSelection(object sender, EventArgs e)
+        {
+            var cpmpopup = sender as CopyPasteMovePopup;
+            if (cpmpopup.isMoving)
+            {
+                this.clickThroughSelectionLayer();
+                this.MainCanvas.PointerMoved += MainCanvas_PointerMoved;
+            }
+        }
+
+        private void clickThroughSelectionLayer()
+        {
+            if (this.MainPanel.Children.OfType<SelectionLayer>().Count() > 0)
+            {
+                var layer = this.MainPanel.Children.OfType<SelectionLayer>().First();
+                layer.SetValue(Canvas.ZIndexProperty, 0);
+                this.MainCanvas.SetValue(Canvas.ZIndexProperty, 1);
+                this.MainCanvas.PointerReleased += MainCanvas_PointerReleased;
+            }
+        }
+
+        private void MainCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
+        {
+            this.MainCanvas.SetValue(Canvas.ZIndexProperty, 0);
+            this.injectSelectionLayer();
+            this.MainCanvas.PointerMoved -= MainCanvas_PointerMoved;
+            this.MainCanvas.PointerReleased -= MainCanvas_PointerReleased;
+        }
+
+        private void Cpmpopup_CopySelection(object sender, EventArgs e)
+        {
+            this.removeSelectionLayer();
+            this.MainCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
+            
+            this.MainCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(0,0));
+        }
+        private Point lastpoint = new Point(-1000, -1000);
+
+        private void MainCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
+        {
+            var currentPoint = e.GetCurrentPoint(this.MainCanvas).Position;
+            if (this.lastpoint.X > 0 && this.lastpoint != currentPoint)
+            {
+                var translation = new Point(currentPoint.X - lastpoint.X, currentPoint.Y - lastpoint.Y);
+                this.MainCanvas.InkPresenter.StrokeContainer.MoveSelected(translation);
+            }
+            this.lastpoint = currentPoint;
         }
 
         private void removeSelectionLayer()

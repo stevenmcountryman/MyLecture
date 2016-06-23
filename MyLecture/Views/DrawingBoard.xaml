@@ -39,6 +39,8 @@
             </Viewbox>
         </Button>
 
+        <TextBlock x:Name="Temp" FontSize="30" RelativePanel.AlignHorizontalCenterWithPanel="True" />
+
         <InkToolbar x:Name="MainInkToolbar" 
                     TargetInkCanvas="{x:Bind MainCanvas}"
                     RelativePanel.AlignHorizontalCenterWithPanel="True"
