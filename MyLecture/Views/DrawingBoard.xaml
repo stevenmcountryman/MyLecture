@@ -8,14 +8,24 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <BrushCollection x:Key="PenSolidColorCollection">
+            <SolidColorBrush Color="Black" />
+            <SolidColorBrush Color="White" />
+            <SolidColorBrush Color="Gray" />
+            <SolidColorBrush Color="Blue" />
+            <SolidColorBrush Color="Green" />
+        </BrushCollection>
+    </Page.Resources>
+
     <RelativePanel x:Name="MainPanel" 
                    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <InkCanvas x:Name="MainCanvas"                    
+        <InkCanvas x:Name="MainCanvas"    
                    RelativePanel.AlignBottomWithPanel="True"
                    RelativePanel.AlignLeftWithPanel="True"
                    RelativePanel.AlignRightWithPanel="True"
-                   RelativePanel.AlignTopWithPanel="True"/>
-        
+                   RelativePanel.AlignTopWithPanel="True" />
+
         <Button x:Name="SlideViewButton"                
                 Margin="24"
                 Padding="0"
@@ -32,13 +42,26 @@
         <InkToolbar x:Name="MainInkToolbar" 
                     TargetInkCanvas="{x:Bind MainCanvas}"
                     RelativePanel.AlignHorizontalCenterWithPanel="True"
-                    RelativePanel.AlignBottomWithPanel="True">
-            <InkToolbarCustomPenButton x:Name="SelectionTool">
+                    RelativePanel.AlignBottomWithPanel="True"
+                    ActiveToolChanged="MainInkToolbar_ActiveToolChanged">
+            <InkToolbarCustomPenButton x:Name="CalligraphyPen"
+                                       MinStrokeWidth="1"
+                                       MaxStrokeWidth="3"
+                                       SelectedStrokeWidth="2" 
+                                       Palette="{StaticResource PenSolidColorCollection}"
+                                       IsExtensionGlyphShown="True">
                 <InkToolbarCustomPenButton.CustomPen>
                     <controls:CalligraphicPen/>
                 </InkToolbarCustomPenButton.CustomPen>
-                <SymbolIcon Symbol="SelectAll" />
+                <InkToolbarCustomPenButton.ConfigurationContent>
+                    <InkToolbarPenConfigurationControl/>
+                </InkToolbarCustomPenButton.ConfigurationContent>
+                <SymbolIcon Symbol="Italic" />
             </InkToolbarCustomPenButton>
+            <InkToolbarCustomToolButton x:Name="SelectionTool"
+                                       IsExtensionGlyphShown="false">
+                <SymbolIcon Symbol="SelectAll" />
+            </InkToolbarCustomToolButton>
             <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" 
                                           Checked="ToggleTouchInkingButton_Checked" 
                                           Unchecked="ToggleTouchInkingButton_Unchecked">

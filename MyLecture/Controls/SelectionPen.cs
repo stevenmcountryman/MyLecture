@@ -11,16 +11,15 @@ using Windows.UI.Xaml.Media;
 
 namespace MyLecture.Controls
 {
-    public class CalligraphicPen : InkToolbarCustomPen
+    class SelectionPen : InkToolbarCustomPen
     {
         protected override InkDrawingAttributes CreateInkDrawingAttributesCore(Brush brush, double strokeWidth)
         {
             var attributes = new InkDrawingAttributes()
             {
                 PenTip = PenTipShape.Circle,
-                Size = new Windows.Foundation.Size(strokeWidth, strokeWidth * 20),
+                Size = new Windows.Foundation.Size(2, 2),
                 Color = (brush as SolidColorBrush).Color,
-                PenTipTransform = Matrix3x2.CreateRotation(45.0F),
                 IgnorePressure = false,
                 DrawAsHighlighter = false,
                 FitToCurve = false

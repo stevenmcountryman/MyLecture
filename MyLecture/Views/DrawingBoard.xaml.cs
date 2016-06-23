@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MyLecture.Controls;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,6 +16,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.UI.Xaml.Shapes;
 
 namespace MyLecture.Views
 {
@@ -27,6 +29,7 @@ namespace MyLecture.Views
         private SolidColorBrush whiteColor = new SolidColorBrush(Colors.White);
         private SolidColorBrush blackColor = new SolidColorBrush(Colors.Black);
         private bool canTouchInk = false;
+        private uint pointer;
 
         public DrawingBoard()
         {
@@ -37,13 +40,11 @@ namespace MyLecture.Views
 
         private void ToggleTouchInkingButton_Checked(object sender, RoutedEventArgs e)
         {
-            this.canTouchInk = true;
             this.toggleTouchInking();
         }
 
         private void ToggleTouchInkingButton_Unchecked(object sender, RoutedEventArgs e)
         {
-            this.canTouchInk = false;
             this.toggleTouchInking();
         }
 
@@ -63,7 +64,7 @@ namespace MyLecture.Views
 
         private void toggleTouchInking()
         {
-            if (this.canTouchInk)
+            if (this.ToggleTouchInkingButton.IsChecked == true)
             {
                 this.MainCanvas.InkPresenter.InputDeviceTypes = CoreInputDeviceTypes.Touch | CoreInputDeviceTypes.Mouse | CoreInputDeviceTypes.Pen;
             }
@@ -123,5 +124,49 @@ namespace MyLecture.Views
         #endregion
 
         #endregion
+
+        private void MainInkToolbar_ActiveToolChanged(InkToolbar sender, object args)
+        {
+            this.removeSelectionLayer();
+            if (this.MainInkToolbar.ActiveTool == SelectionTool)
+            {
+                this.canTouchInk = this.ToggleTouchInkingButton.IsChecked.Value;
+                this.ToggleTouchInkingButton.IsChecked = false;
+                this.injectSelectionLayer();
+            }
+            else
+            {
+                this.ToggleTouchInkingButton.IsChecked = this.canTouchInk;
+            }
+        }
+
+        private void SelectionLayer_SelectionMade(object sender, EventArgs e)
+        {
+            var selectionPoints = (sender as SelectionLayer).selectionPoints;
+            this.MainCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(selectionPoints);
+            this.MainCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
+            this.MainCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(50,50));
+            this.injectSelectionLayer();
+        }
+
+        private void removeSelectionLayer()
+        {
+            if (this.MainPanel.Children.OfType<SelectionLayer>().Count() > 0)
+            {
+                this.MainPanel.Children.Remove(this.MainPanel.Children.OfType<SelectionLayer>().First());
+            }
+        }
+
+        private void injectSelectionLayer()
+        {
+            this.removeSelectionLayer();
+            SelectionLayer selectionLayer = new SelectionLayer();
+            selectionLayer.SelectionMade += SelectionLayer_SelectionMade;
+            RelativePanel.SetAlignBottomWithPanel(selectionLayer, true);
+            RelativePanel.SetAlignLeftWithPanel(selectionLayer, true);
+            RelativePanel.SetAlignTopWithPanel(selectionLayer, true);
+            RelativePanel.SetAlignRightWithPanel(selectionLayer, true);
+            this.MainPanel.Children.Insert(this.MainPanel.Children.Count - 1, selectionLayer);
+        }
     }
 }

@@ -99,6 +99,11 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\CalligraphicPen.cs" />
+    <Compile Include="Controls\SelectionLayer.xaml.cs">
+      <DependentUpon>SelectionLayer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SelectionPen.cs" />
+    <Compile Include="Controls\SelectionPenTipShape.cs" />
     <Compile Include="Controls\SlidesViewControl.xaml.cs">
       <DependentUpon>SlidesViewControl.xaml</DependentUpon>
     </Compile>
@@ -131,6 +136,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Controls\SelectionLayer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\SlidesViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
