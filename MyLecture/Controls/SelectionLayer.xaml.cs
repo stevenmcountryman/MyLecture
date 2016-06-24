@@ -40,26 +40,34 @@ namespace MyLecture.Controls
         {
             this.pointer = e.Pointer.PointerId;
             var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
-            Rectangle rect = new Rectangle();
+            var rect = new Polygon();
             rect.Stroke = new SolidColorBrush(Colors.Gray);
             rect.Fill = new SolidColorBrush(Colors.Transparent);
             rect.StrokeThickness = 3;
             rect.StrokeDashArray = new DoubleCollection() { 2 };
-            Canvas.SetLeft(rect, currentPoint.X);
-            Canvas.SetTop(rect, currentPoint.Y);
-            rect.Width = 0;
-            rect.Height = 0;
+            PointCollection points = new PointCollection()
+            {
+                new Point(currentPoint.X, currentPoint.Y)
+            };
+            rect.Points = points;
             this.SelectionCanvas.Children.Add(rect);
         }
 
         private void SelectionCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
         {
             if (this.pointer == e.Pointer.PointerId)
-            {
+            {                
                 var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
-                var rect = this.SelectionCanvas.Children[0] as Rectangle;
-                rect.Width = currentPoint.X - Canvas.GetLeft(rect);
-                rect.Height = currentPoint.Y - Canvas.GetTop(rect);
+                var rect = this.SelectionCanvas.Children[0] as Polygon;
+                var originalPoint = rect.Points[0];
+                rect.Points = new PointCollection()
+                {
+                    originalPoint,
+                    new Point(currentPoint.X, originalPoint.Y),
+                    new Point(currentPoint.X, currentPoint.Y),
+                    new Point(originalPoint.X, currentPoint.Y)
+                };
+                this.selectionPoints = rect.Points.ToList<Point>();
             }
         }
 
@@ -68,18 +76,6 @@ namespace MyLecture.Controls
             if (this.pointer != 0)
             {
                 this.pointer = 0;
-                var rect = this.SelectionCanvas.Children[0] as Rectangle;
-                var leftEdge = Canvas.GetLeft(rect);
-                var rightEdge = Canvas.GetLeft(rect) + rect.Width;
-                var topEdge = Canvas.GetTop(rect);
-                var botEdge = Canvas.GetTop(rect) + rect.Height;
-                this.selectionPoints = new List<Point>()
-                {
-                    new Point(leftEdge, topEdge),
-                    new Point(leftEdge, botEdge),
-                    new Point(rightEdge, botEdge),
-                    new Point(rightEdge, topEdge)
-                };
 
                 this.SelectionCanvas.PointerPressed -= SelectionCanvas_PointerPressed;
                 this.SelectionCanvas.PointerMoved -= SelectionCanvas_PointerMoved;

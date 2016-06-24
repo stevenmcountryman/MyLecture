@@ -30,6 +30,7 @@ namespace MyLecture.Views
         private SolidColorBrush blackColor = new SolidColorBrush(Colors.Black);
         private bool canTouchInk = false;
         private uint pointer;
+        private Point lastpoint;
 
         public DrawingBoard()
         {
@@ -142,23 +143,28 @@ namespace MyLecture.Views
         private void SelectionLayer_SelectionMade(object sender, EventArgs e)
         {
             var selectionPoints = (sender as SelectionLayer).selectionPoints;
-            this.MainCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(selectionPoints);
-            var leftEdge = selectionPoints[0].X;
-            var rightEdge = selectionPoints[2].X;
-            var topEdge = selectionPoints[0].Y;
-            var botEdge = selectionPoints[1].Y;
-            var selectionWidth = rightEdge - leftEdge;
-            var selectionHeight = botEdge - topEdge;
+            if (selectionPoints != null)
+            {
+                this.MainCanvas.InkPresenter.StrokeContainer.SelectWithPolyLine(selectionPoints);
+                double horizontalCenter = 0;
+                double verticalCenter = 0;
+                foreach (Point point in selectionPoints)
+                {
+                    horizontalCenter += point.X;
+                    verticalCenter += point.Y;
+                }
+                var centerPoint = this.lastpoint = new Point(horizontalCenter / selectionPoints.Count(), verticalCenter / selectionPoints.Count());
 
-            CopyPasteMovePopup cpmpopup = new CopyPasteMovePopup();
-            Canvas.SetLeft(cpmpopup, (leftEdge + (selectionWidth / 2) - 56));
-            Canvas.SetTop(cpmpopup, topEdge + (selectionHeight / 2) - 14);
+                CopyPasteMovePopup cpmpopup = new CopyPasteMovePopup();
+                Canvas.SetLeft(cpmpopup, centerPoint.X - 56);
+                Canvas.SetTop(cpmpopup, centerPoint.Y - 14);
 
-            cpmpopup.CopySelection += Cpmpopup_CopySelection;
-            cpmpopup.MoveSelection += Cpmpopup_MoveSelection;
-            cpmpopup.ClearSelection += Cpmpopup_ClearSelection;
+                cpmpopup.CopySelection += Cpmpopup_CopySelection;
+                cpmpopup.MoveSelection += Cpmpopup_MoveSelection;
+                cpmpopup.ClearSelection += Cpmpopup_ClearSelection;
 
-            (sender as SelectionLayer).showCopyMovePopup(cpmpopup);
+                (sender as SelectionLayer).showCopyMovePopup(cpmpopup);
+            }
         }
 
         private void Cpmpopup_ClearSelection(object sender, EventArgs e)
@@ -197,12 +203,12 @@ namespace MyLecture.Views
 
         private void Cpmpopup_CopySelection(object sender, EventArgs e)
         {
-            this.removeSelectionLayer();
             this.MainCanvas.InkPresenter.StrokeContainer.CopySelectedToClipboard();
             
             this.MainCanvas.InkPresenter.StrokeContainer.PasteFromClipboard(new Point(0,0));
+
+            this.injectSelectionLayer();
         }
-        private Point lastpoint = new Point(-1000, -1000);
 
         private void MainCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
         {
