@@ -99,6 +99,7 @@
     <Compile Include="Controls\CopyPasteMovePopup.xaml.cs">
       <DependentUpon>CopyPasteMovePopup.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\InkStrokeMemory.cs" />
     <Compile Include="Controls\SelectionLayer.xaml.cs">
       <DependentUpon>SelectionLayer.xaml</DependentUpon>
     </Compile>

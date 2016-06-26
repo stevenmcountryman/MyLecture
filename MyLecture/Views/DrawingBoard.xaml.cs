@@ -29,11 +29,53 @@ namespace MyLecture.Views
         private SolidColorBrush whiteColor = new SolidColorBrush(Colors.White);
         private SolidColorBrush blackColor = new SolidColorBrush(Colors.Black);
         private bool canTouchInk = false;
+        private InkToolbarToolButton lastTool;
         private Point lastpoint;
+
+        private List<InkStrokeMemory> strokeCollection = new List<InkStrokeMemory>();
 
         public DrawingBoard()
         {
             this.InitializeComponent();
+
+            this.MainCanvas.InkPresenter.StrokesCollected += InkPresenter_StrokesCollected;
+            this.MainCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
+        }
+
+        private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
+        {
+            this.UndoTool.Visibility = Visibility.Visible;
+            this.lastTool = this.MainInkToolbar.ActiveTool;
+            var stroke = args.Strokes[0];
+            var inkStrokeMemory = new InkStrokeMemory(stroke, new Point(stroke.BoundingRect.X, stroke.BoundingRect.Y), InkStrokeMemory.ActionTaken.Deleted);
+            this.strokeCollection.Add(inkStrokeMemory);
+
+            if (this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0)
+            {
+                this.SelectionTool.IsEnabled = true;
+            }
+            else
+            {
+                this.SelectionTool.IsEnabled = false;
+            }
+        }
+
+        private void InkPresenter_StrokesCollected(InkPresenter sender, InkStrokesCollectedEventArgs args)
+        {
+            this.UndoTool.Visibility = Visibility.Visible;
+            this.lastTool = this.MainInkToolbar.ActiveTool;
+            var stroke = args.Strokes[0];
+            var inkStrokeMemory = new InkStrokeMemory(stroke, new Point(stroke.BoundingRect.X, stroke.BoundingRect.Y), InkStrokeMemory.ActionTaken.Added);
+            this.strokeCollection.Add(inkStrokeMemory);
+
+            if (this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0)
+            {
+                this.SelectionTool.IsEnabled = true;
+            }
+            else
+            {
+                this.SelectionTool.IsEnabled = false;
+            }
         }
 
         #region InkToolbar Custom Actions
@@ -238,6 +280,33 @@ namespace MyLecture.Views
             RelativePanel.SetAlignTopWithPanel(selectionLayer, true);
             RelativePanel.SetAlignRightWithPanel(selectionLayer, true);
             this.MainPanel.Children.Insert(this.MainPanel.Children.Count - 1, selectionLayer);
+        }
+
+        private void processUndo()
+        {
+            var lastStrokeEvent = this.strokeCollection.Last();
+            this.strokeCollection.Remove(lastStrokeEvent);
+
+            if (lastStrokeEvent.actionTaken == InkStrokeMemory.ActionTaken.Added)
+            {
+                this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes().Last().Selected = true;
+                this.MainCanvas.InkPresenter.StrokeContainer.DeleteSelected();
+            }
+            else
+            {
+            }
+
+            if (this.strokeCollection.Count() == 0)
+            {
+                this.UndoTool.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void UndoTool_Click(object sender, RoutedEventArgs e)
+        {
+            this.UndoTool.IsChecked = false;
+            this.MainInkToolbar.ActiveTool = this.lastTool;
+            this.processUndo();
         }
     }
 }

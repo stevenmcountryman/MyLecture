@@ -22,6 +22,11 @@ namespace MyLecture.Controls
     public sealed partial class SelectionLayer : UserControl
     {
         private uint pointer;
+        private Polygon selectionLasso;
+
+        public delegate void SelectionMadeHandler(object sender, EventArgs e);
+        public event SelectionMadeHandler SelectionMade;
+
         public List<Point> selectionPoints
         {
             get
@@ -29,10 +34,6 @@ namespace MyLecture.Controls
                 return this.selectionLasso.Points.ToList<Point>();
             }
         }
-        private Polygon selectionLasso;
-        
-        public delegate void SelectionMadeHandler(object sender, EventArgs e);
-        public event SelectionMadeHandler SelectionMade;
 
         public SelectionLayer()
         {

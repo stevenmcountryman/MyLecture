@@ -61,9 +61,15 @@
                 <SymbolIcon Symbol="Italic" />
             </InkToolbarCustomPenButton>
             <InkToolbarCustomToolButton x:Name="SelectionTool"
-                                       IsExtensionGlyphShown="false">
+                                        IsExtensionGlyphShown="false"
+                                        IsEnabled="False">
                 <SymbolIcon Symbol="SelectAll" />
             </InkToolbarCustomToolButton>
+            <InkToolbarCustomToggleButton x:Name="UndoTool"
+                                        Visibility="Collapsed"
+                                        Click="UndoTool_Click">
+                <SymbolIcon Symbol="Undo"/>
+            </InkToolbarCustomToggleButton>
             <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" 
                                           Checked="ToggleTouchInkingButton_Checked" 
                                           Unchecked="ToggleTouchInkingButton_Unchecked">
