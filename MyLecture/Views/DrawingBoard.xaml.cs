@@ -29,7 +29,6 @@ namespace MyLecture.Views
         private SolidColorBrush whiteColor = new SolidColorBrush(Colors.White);
         private SolidColorBrush blackColor = new SolidColorBrush(Colors.Black);
         private bool canTouchInk = false;
-        private uint pointer;
         private Point lastpoint;
 
         public DrawingBoard()

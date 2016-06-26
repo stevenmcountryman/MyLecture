@@ -24,9 +24,12 @@ namespace MyLecture.Controls
         private uint pointer;
         public List<Point> selectionPoints
         {
-            get;
-            private set;
+            get
+            {
+                return this.selectionLasso.Points.ToList<Point>();
+            }
         }
+        private Polygon selectionLasso;
         
         public delegate void SelectionMadeHandler(object sender, EventArgs e);
         public event SelectionMadeHandler SelectionMade;
@@ -38,19 +41,20 @@ namespace MyLecture.Controls
 
         private void SelectionCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
+            this.SelectionCanvas.Children.Clear();
             this.pointer = e.Pointer.PointerId;
             var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
-            var rect = new Polygon();
-            rect.Stroke = new SolidColorBrush(Colors.Gray);
-            rect.Fill = new SolidColorBrush(Colors.Transparent);
-            rect.StrokeThickness = 3;
-            rect.StrokeDashArray = new DoubleCollection() { 2 };
+            this.selectionLasso = new Polygon();
+            this.selectionLasso.Stroke = new SolidColorBrush(Colors.Gray);
+            this.selectionLasso.Fill = new SolidColorBrush(Colors.Transparent);
+            this.selectionLasso.StrokeThickness = 2;
+            this.selectionLasso.StrokeDashArray = new DoubleCollection() { 2 };
             PointCollection points = new PointCollection()
             {
                 new Point(currentPoint.X, currentPoint.Y)
             };
-            rect.Points = points;
-            this.SelectionCanvas.Children.Add(rect);
+            this.selectionLasso.Points = points;
+            this.SelectionCanvas.Children.Add(this.selectionLasso);
         }
 
         private void SelectionCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
@@ -58,16 +62,7 @@ namespace MyLecture.Controls
             if (this.pointer == e.Pointer.PointerId)
             {                
                 var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
-                var rect = this.SelectionCanvas.Children[0] as Polygon;
-                var originalPoint = rect.Points[0];
-                rect.Points = new PointCollection()
-                {
-                    originalPoint,
-                    new Point(currentPoint.X, originalPoint.Y),
-                    new Point(currentPoint.X, currentPoint.Y),
-                    new Point(originalPoint.X, currentPoint.Y)
-                };
-                this.selectionPoints = rect.Points.ToList<Point>();
+                this.selectionLasso.Points.Add(currentPoint);
             }
         }
 
