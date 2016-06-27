@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Input.Inking;
@@ -31,24 +32,42 @@ namespace MyLecture.Views
         private bool canTouchInk = false;
         private InkToolbarToolButton lastTool;
         private Point lastpoint;
-
-        private List<InkStrokeMemory> strokeCollection = new List<InkStrokeMemory>();
+        private int tempFileCount = 0;
+        private StorageFolder folder;
 
         public DrawingBoard()
         {
             this.InitializeComponent();
-
+            
             this.MainCanvas.InkPresenter.StrokesCollected += InkPresenter_StrokesCollected;
             this.MainCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
+        }
+
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            try
+            {
+                this.folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("tempFiles");
+            }
+            catch (Exception s)
+            {
+                this.folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("tempFiles");
+            }          
+        }
+
+        protected async override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            base.OnNavigatingFrom(e);
+            
+            await this.folder.DeleteAsync();            
         }
 
         private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
         {
             this.UndoTool.Visibility = Visibility.Visible;
             this.lastTool = this.MainInkToolbar.ActiveTool;
-            var stroke = args.Strokes[0];
-            var inkStrokeMemory = new InkStrokeMemory(stroke, new Point(stroke.BoundingRect.X, stroke.BoundingRect.Y), InkStrokeMemory.ActionTaken.Deleted);
-            this.strokeCollection.Add(inkStrokeMemory);
 
             if (this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0)
             {
@@ -60,13 +79,17 @@ namespace MyLecture.Views
             }
         }
 
-        private void InkPresenter_StrokesCollected(InkPresenter sender, InkStrokesCollectedEventArgs args)
+        private async void InkPresenter_StrokesCollected(InkPresenter sender, InkStrokesCollectedEventArgs args)
         {
             this.UndoTool.Visibility = Visibility.Visible;
             this.lastTool = this.MainInkToolbar.ActiveTool;
-            var stroke = args.Strokes[0];
-            var inkStrokeMemory = new InkStrokeMemory(stroke, new Point(stroke.BoundingRect.X, stroke.BoundingRect.Y), InkStrokeMemory.ActionTaken.Added);
-            this.strokeCollection.Add(inkStrokeMemory);
+
+            this.tempFileCount++;
+            StorageFile file = await this.folder.CreateFileAsync("temp" + this.tempFileCount + ".ink", CreationCollisionOption.ReplaceExisting);
+            using (var outputStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                await this.MainCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
+            }
 
             if (this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0)
             {
@@ -282,21 +305,24 @@ namespace MyLecture.Views
             this.MainPanel.Children.Insert(this.MainPanel.Children.Count - 1, selectionLayer);
         }
 
-        private void processUndo()
+        private async void processUndo()
         {
-            var lastStrokeEvent = this.strokeCollection.Last();
-            this.strokeCollection.Remove(lastStrokeEvent);
-
-            if (lastStrokeEvent.actionTaken == InkStrokeMemory.ActionTaken.Added)
+            this.tempFileCount--;
+            if (this.tempFileCount == 0)
             {
-                this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes().Last().Selected = true;
-                this.MainCanvas.InkPresenter.StrokeContainer.DeleteSelected();
+                this.MainCanvas.InkPresenter.StrokeContainer.Clear();
             }
             else
             {
+                StorageFile file = await this.folder.GetFileAsync("temp" + this.tempFileCount + ".ink");
+                using (var inputStream = await file.OpenAsync(FileAccessMode.Read))
+                {
+                    this.MainCanvas.InkPresenter.StrokeContainer.Clear();
+                    await this.MainCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                }
             }
 
-            if (this.strokeCollection.Count() == 0)
+            if (this.tempFileCount == 0)
             {
                 this.UndoTool.Visibility = Visibility.Collapsed;
             }
