@@ -18,13 +18,47 @@
         </BrushCollection>
     </Page.Resources>
 
-    <RelativePanel x:Name="MainPanel" 
+    <RelativePanel x:Name="MainPanel"
+                   Background="Gray">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="VisualStateGroup">
+                <VisualState x:Name="VisualStatePhone">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0"/>
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="VisualStateTablet">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="640" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="VisualStateDesktop">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1008" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Viewbox RelativePanel.AlignHorizontalCenterWithPanel="True"
+                 RelativePanel.AlignVerticalCenterWithPanel="True">
+            <RelativePanel  x:Name="InkPanel"
+                            Width="1600"
+                            Height="1000"
                    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <InkCanvas x:Name="MainCanvas"    
+                <InkCanvas x:Name="MainCanvas"    
                    RelativePanel.AlignBottomWithPanel="True"
                    RelativePanel.AlignLeftWithPanel="True"
                    RelativePanel.AlignRightWithPanel="True"
-                   RelativePanel.AlignTopWithPanel="True" />
+                   RelativePanel.AlignTopWithPanel="True"/>
+            </RelativePanel>
+        </Viewbox>
 
         <Button x:Name="SlideViewButton"                
                 Margin="24"
@@ -38,8 +72,6 @@
                 <SymbolIcon Symbol="ClosePane" />
             </Viewbox>
         </Button>
-
-        <TextBlock x:Name="Temp" FontSize="30" RelativePanel.AlignHorizontalCenterWithPanel="True" />
 
         <InkToolbar x:Name="MainInkToolbar" 
                     TargetInkCanvas="{x:Bind MainCanvas}"
@@ -66,9 +98,14 @@
                 <SymbolIcon Symbol="SelectAll" />
             </InkToolbarCustomToolButton>
             <InkToolbarCustomToggleButton x:Name="UndoTool"
-                                        Visibility="Collapsed"
-                                        Click="UndoTool_Click">
+                                        Click="UndoTool_Click"
+                                          IsEnabled="False">
                 <SymbolIcon Symbol="Undo"/>
+            </InkToolbarCustomToggleButton>
+            <InkToolbarCustomToggleButton x:Name="RedoTool"
+                                        Click="RedoTool_Click"
+                                          IsEnabled="False">
+                <SymbolIcon Symbol="Redo"/>
             </InkToolbarCustomToggleButton>
             <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" 
                                           Checked="ToggleTouchInkingButton_Checked" 

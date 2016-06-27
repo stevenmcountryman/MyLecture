@@ -33,6 +33,7 @@ namespace MyLecture.Views
         private InkToolbarToolButton lastTool;
         private Point lastpoint;
         private int tempFileCount = 0;
+        private int maxTempFile = 0;
         private StorageFolder folder;
 
         public DrawingBoard()
@@ -64,10 +65,19 @@ namespace MyLecture.Views
             await this.folder.DeleteAsync();            
         }
 
-        private void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
+        private async void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
         {
-            this.UndoTool.Visibility = Visibility.Visible;
+            this.UndoTool.IsEnabled = true;
+            this.RedoTool.IsEnabled = false;
             this.lastTool = this.MainInkToolbar.ActiveTool;
+
+            this.tempFileCount++;
+            this.maxTempFile = this.tempFileCount;
+            StorageFile file = await this.folder.CreateFileAsync("temp" + this.tempFileCount + ".ink", CreationCollisionOption.ReplaceExisting);
+            using (var outputStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                await this.MainCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
+            }
 
             if (this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0)
             {
@@ -81,10 +91,12 @@ namespace MyLecture.Views
 
         private async void InkPresenter_StrokesCollected(InkPresenter sender, InkStrokesCollectedEventArgs args)
         {
-            this.UndoTool.Visibility = Visibility.Visible;
+            this.UndoTool.IsEnabled = true;
+            this.RedoTool.IsEnabled = false;
             this.lastTool = this.MainInkToolbar.ActiveTool;
 
             this.tempFileCount++;
+            this.maxTempFile = this.tempFileCount;
             StorageFile file = await this.folder.CreateFileAsync("temp" + this.tempFileCount + ".ink", CreationCollisionOption.ReplaceExisting);
             using (var outputStream = await file.OpenAsync(FileAccessMode.ReadWrite))
             {
@@ -143,7 +155,7 @@ namespace MyLecture.Views
         {
             if (isCanvasWhite)
             {
-                this.MainPanel.Background = this.whiteColor;
+                this.InkPanel.Background = this.whiteColor;
                 this.SlideViewButton.Foreground = this.blackColor;
 
                 var allStrokes = this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes();
@@ -157,7 +169,7 @@ namespace MyLecture.Views
             }
             else
             {
-                this.MainPanel.Background = this.blackColor;
+                this.InkPanel.Background = this.blackColor;
                 this.SlideViewButton.Foreground = this.whiteColor;
 
                 var allStrokes = this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes();
@@ -248,9 +260,9 @@ namespace MyLecture.Views
 
         private void clickThroughSelectionLayer()
         {
-            if (this.MainPanel.Children.OfType<SelectionLayer>().Count() > 0)
+            if (this.InkPanel.Children.OfType<SelectionLayer>().Count() > 0)
             {
-                var layer = this.MainPanel.Children.OfType<SelectionLayer>().First();
+                var layer = this.InkPanel.Children.OfType<SelectionLayer>().First();
                 layer.SetValue(Canvas.ZIndexProperty, 0);
                 this.MainCanvas.SetValue(Canvas.ZIndexProperty, 1);
                 this.MainCanvas.PointerReleased += MainCanvas_PointerReleased;
@@ -287,9 +299,9 @@ namespace MyLecture.Views
 
         private void removeSelectionLayer()
         {
-            if (this.MainPanel.Children.OfType<SelectionLayer>().Count() > 0)
+            if (this.InkPanel.Children.OfType<SelectionLayer>().Count() > 0)
             {
-                this.MainPanel.Children.Remove(this.MainPanel.Children.OfType<SelectionLayer>().First());
+                this.InkPanel.Children.Remove(this.InkPanel.Children.OfType<SelectionLayer>().First());
             }
         }
 
@@ -302,7 +314,7 @@ namespace MyLecture.Views
             RelativePanel.SetAlignLeftWithPanel(selectionLayer, true);
             RelativePanel.SetAlignTopWithPanel(selectionLayer, true);
             RelativePanel.SetAlignRightWithPanel(selectionLayer, true);
-            this.MainPanel.Children.Insert(this.MainPanel.Children.Count - 1, selectionLayer);
+            this.InkPanel.Children.Add(selectionLayer);
         }
 
         private async void processUndo()
@@ -322,9 +334,28 @@ namespace MyLecture.Views
                 }
             }
 
+            this.RedoTool.IsEnabled = true;
             if (this.tempFileCount == 0)
             {
-                this.UndoTool.Visibility = Visibility.Collapsed;
+                this.UndoTool.IsEnabled = false;
+            }
+        }
+
+        private async void processRedo()
+        {
+            this.tempFileCount++;
+
+            StorageFile file = await this.folder.GetFileAsync("temp" + this.tempFileCount + ".ink");
+            using (var inputStream = await file.OpenAsync(FileAccessMode.Read))
+            {
+                this.MainCanvas.InkPresenter.StrokeContainer.Clear();
+                await this.MainCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+            }
+
+            this.UndoTool.IsEnabled = true;
+            if (this.tempFileCount == this.maxTempFile)
+            {
+                this.RedoTool.IsEnabled = false;
             }
         }
 
@@ -333,6 +364,13 @@ namespace MyLecture.Views
             this.UndoTool.IsChecked = false;
             this.MainInkToolbar.ActiveTool = this.lastTool;
             this.processUndo();
+        }
+
+        private void RedoTool_Click(object sender, RoutedEventArgs e)
+        {
+            this.RedoTool.IsChecked = false;
+            this.MainInkToolbar.ActiveTool = this.lastTool;
+            this.processRedo();
         }
     }
 }
