@@ -35,6 +35,7 @@ namespace MyLecture.Views
         private int tempFileCount = 0;
         private int maxTempFile = 0;
         private StorageFolder folder;
+        private SelectionLayer selectionLayer;
 
         public DrawingBoard()
         {
@@ -299,22 +300,22 @@ namespace MyLecture.Views
 
         private void removeSelectionLayer()
         {
-            if (this.InkPanel.Children.OfType<SelectionLayer>().Count() > 0)
+            if (this.selectionLayer != null)
             {
-                this.InkPanel.Children.Remove(this.InkPanel.Children.OfType<SelectionLayer>().First());
+                this.InkPanel.Children.Remove(this.selectionLayer);
             }
         }
 
         private void injectSelectionLayer()
         {
             this.removeSelectionLayer();
-            SelectionLayer selectionLayer = new SelectionLayer();
-            selectionLayer.SelectionMade += SelectionLayer_SelectionMade;
-            RelativePanel.SetAlignBottomWithPanel(selectionLayer, true);
-            RelativePanel.SetAlignLeftWithPanel(selectionLayer, true);
-            RelativePanel.SetAlignTopWithPanel(selectionLayer, true);
-            RelativePanel.SetAlignRightWithPanel(selectionLayer, true);
-            this.InkPanel.Children.Add(selectionLayer);
+            this.selectionLayer = new SelectionLayer();
+            this.selectionLayer.SelectionMade += SelectionLayer_SelectionMade;
+            RelativePanel.SetAlignBottomWithPanel(this.selectionLayer, true);
+            RelativePanel.SetAlignLeftWithPanel(this.selectionLayer, true);
+            RelativePanel.SetAlignTopWithPanel(this.selectionLayer, true);
+            RelativePanel.SetAlignRightWithPanel(this.selectionLayer, true);
+            this.InkPanel.Children.Add(this.selectionLayer);
         }
 
         private async void processUndo()

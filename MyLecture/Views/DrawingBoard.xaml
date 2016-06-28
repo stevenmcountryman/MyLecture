@@ -51,7 +51,7 @@
             <RelativePanel  x:Name="InkPanel"
                             Width="1600"
                             Height="1000"
-                   Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                 <InkCanvas x:Name="MainCanvas"    
                    RelativePanel.AlignBottomWithPanel="True"
                    RelativePanel.AlignLeftWithPanel="True"
