@@ -16,6 +16,14 @@
             <SolidColorBrush Color="Blue" />
             <SolidColorBrush Color="Green" />
         </BrushCollection>
+
+        <Storyboard x:Name="SlidesViewSlide" >
+            <DoubleAnimation x:Name="SlidesViewAnimation" Duration="0:0:0.1" From="400" To="0" Storyboard.TargetName="SlidesViewTranslate" Storyboard.TargetProperty="X" >
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
     </Page.Resources>
 
     <RelativePanel x:Name="MainPanel"
@@ -67,7 +75,8 @@
                 Width="40"
                 Height="40"
                 RelativePanel.AlignTopWithPanel="True"
-                RelativePanel.AlignRightWithPanel="True">
+                RelativePanel.AlignRightWithPanel="True"
+                Click="SlideViewButton_Click">
             <Viewbox>
                 <SymbolIcon Symbol="ClosePane" />
             </Viewbox>
@@ -118,5 +127,15 @@
                 <SymbolIcon Symbol="Page" />
             </InkToolbarCustomToggleButton>
         </InkToolbar>
+
+        <controls:SlidesViewControl x:Name="SlidesView"
+                                    RelativePanel.AlignBottomWithPanel="True"
+                                    RelativePanel.AlignRightWithPanel="True"
+                                    RelativePanel.AlignTopWithPanel="True"
+                                    Width="400">
+            <controls:SlidesViewControl.RenderTransform>
+                <TranslateTransform x:Name="SlidesViewTranslate" X="400" />
+            </controls:SlidesViewControl.RenderTransform>
+        </controls:SlidesViewControl>
     </RelativePanel>
 </Page>

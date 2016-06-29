@@ -1,9 +1,11 @@
 ﻿using MyLecture.Controls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
@@ -16,6 +18,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Shapes;
 
@@ -52,6 +55,8 @@ namespace MyLecture.Views
             try
             {
                 this.folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("tempFiles");
+                await this.folder.DeleteAsync();
+                this.folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("tempFiles");
             }
             catch (Exception s)
             {
@@ -59,11 +64,16 @@ namespace MyLecture.Views
             }          
         }
 
-        protected async override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        private async Task saveTempFile()
         {
-            base.OnNavigatingFrom(e);
-            
-            await this.folder.DeleteAsync();            
+            this.tempFileCount++;
+            this.maxTempFile = this.tempFileCount;
+            StorageFile file = await this.folder.CreateFileAsync("temp" + this.tempFileCount + ".ink", CreationCollisionOption.ReplaceExisting);
+            using (var outputStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                await this.MainCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
+            }
+            this.SlidesView.updateSlide(file, this.InkPanel.Background);
         }
 
         private async void InkPresenter_StrokesErased(InkPresenter sender, InkStrokesErasedEventArgs args)
@@ -72,13 +82,7 @@ namespace MyLecture.Views
             this.RedoTool.IsEnabled = false;
             this.lastTool = this.MainInkToolbar.ActiveTool;
 
-            this.tempFileCount++;
-            this.maxTempFile = this.tempFileCount;
-            StorageFile file = await this.folder.CreateFileAsync("temp" + this.tempFileCount + ".ink", CreationCollisionOption.ReplaceExisting);
-            using (var outputStream = await file.OpenAsync(FileAccessMode.ReadWrite))
-            {
-                await this.MainCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
-            }
+            await this.saveTempFile();
 
             if (this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0)
             {
@@ -96,13 +100,8 @@ namespace MyLecture.Views
             this.RedoTool.IsEnabled = false;
             this.lastTool = this.MainInkToolbar.ActiveTool;
 
-            this.tempFileCount++;
-            this.maxTempFile = this.tempFileCount;
-            StorageFile file = await this.folder.CreateFileAsync("temp" + this.tempFileCount + ".ink", CreationCollisionOption.ReplaceExisting);
-            using (var outputStream = await file.OpenAsync(FileAccessMode.ReadWrite))
-            {
-                await this.MainCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
-            }
+
+            await this.saveTempFile();
 
             if (this.MainCanvas.InkPresenter.StrokeContainer.GetStrokes().Count > 0)
             {
@@ -372,6 +371,40 @@ namespace MyLecture.Views
             this.RedoTool.IsChecked = false;
             this.MainInkToolbar.ActiveTool = this.lastTool;
             this.processRedo();
+        }
+
+        private void SlideViewButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.SlidesViewAnimation.To = 0;
+            this.SlidesViewSlide.Begin();
+            this.SlidesView.SelectionMade += SlidesView_SelectionMade;
+            this.SlidesView.NewSlideCreated += SlidesView_NewSlideCreated;
+        }
+
+        private void SlidesView_NewSlideCreated(object sender, EventArgs e)
+        {
+            this.MainCanvas.InkPresenter.StrokeContainer.Clear();
+            this.SlidesViewAnimation.To = 400;
+            this.SlidesViewSlide.Begin();
+        }
+
+        private async void SlidesView_SelectionMade(object sender, EventArgs e)
+        {
+            try
+            {
+                this.MainCanvas.InkPresenter.StrokeContainer.Clear();
+                var file = this.SlidesView.getSlide();
+                using (var inputStream = await file.OpenAsync(FileAccessMode.Read))
+                {
+                    await this.MainCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                }
+            }
+            catch (InvalidOperationException invOp)
+            {
+                Debug.WriteLine(invOp.Message);
+            }
+            this.SlidesViewAnimation.To = 400;
+            this.SlidesViewSlide.Begin();
         }
     }
 }

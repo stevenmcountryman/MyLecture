@@ -18,7 +18,11 @@
             <TextBlock Text="Slides"
                        FontSize="24"
                        Foreground="White"
-                       FontWeight="Bold"/>
+                       FontWeight="Bold" Tapped="TextBlock_Tapped"/>
+            <GridView x:Name="SlidesGrid" 
+                      ItemClick="SlidesGrid_ItemClick" Tapped="SlidesGrid_Tapped">  
+                
+            </GridView>
         </StackPanel>
     </RelativePanel>
 </UserControl>
