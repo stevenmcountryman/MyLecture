@@ -10,19 +10,18 @@
     d:DesignWidth="400">
 
     <RelativePanel Background="Gray">
-        <StackPanel Margin="24"
-                    RelativePanel.AlignTopWithPanel="True"
-                    RelativePanel.AlignBottomWithPanel="True"
-                    RelativePanel.AlignLeftWithPanel="True"
-                    RelativePanel.AlignRightWithPanel="True">
-            <TextBlock Text="Slides"
+        <TextBlock x:Name="TitleText"
+                        Text="Slides"
+                       Margin="24,24,24,0"
                        FontSize="24"
                        Foreground="White"
-                       FontWeight="Bold" Tapped="TextBlock_Tapped"/>
-            <GridView x:Name="SlidesGrid" 
-                      ItemClick="SlidesGrid_ItemClick" Tapped="SlidesGrid_Tapped">  
-                
-            </GridView>
-        </StackPanel>
+                       FontWeight="Bold"/>
+        <GridView x:Name="SlidesGrid" 
+                       Margin="24,12,24,12"
+                      Tapped="SlidesGrid_Tapped"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  RelativePanel.Below="TitleText"
+                  RelativePanel.AlignBottomWithPanel="True">
+        </GridView>
     </RelativePanel>
 </UserControl>

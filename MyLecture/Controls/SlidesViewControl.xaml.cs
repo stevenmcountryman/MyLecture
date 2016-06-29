@@ -33,8 +33,33 @@ namespace MyLecture.Controls
         public SlidesViewControl()
         {
             this.InitializeComponent();
-            this.createNewSlide();
+            this.initialSetup();
             this.loadSlidesFolder();
+        }
+
+        private void initialSetup()
+        {
+            this.slides.Add(null);
+            SymbolIcon icon = new SymbolIcon(Symbol.Add);
+            Viewbox iconBox = new Viewbox()
+            {
+                Width = 100,
+                Height = 100,
+                Child = icon
+            };
+            RelativePanel.SetAlignHorizontalCenterWithPanel(iconBox, true);
+            RelativePanel.SetAlignVerticalCenterWithPanel(iconBox, true);
+            RelativePanel panel = new RelativePanel()
+            {
+                Width = 1600,
+                Height = 1000,
+                Background = new SolidColorBrush(Colors.White)
+            };
+            panel.Children.Add(iconBox);
+            Viewbox viewbox = new Viewbox();
+            viewbox.Child = panel;
+            this.SlidesGrid.Items.Add(viewbox);
+            this.createNewSlide();
         }
 
         public StorageFile getSlide()
@@ -67,8 +92,8 @@ namespace MyLecture.Controls
             };
             Viewbox viewbox = new Viewbox();
             viewbox.Child = panel;
-            this.SlidesGrid.Items.Add(viewbox);
-            this.currentSlide = this.SlidesGrid.Items.Count() - 1;
+            this.SlidesGrid.Items.Insert((this.SlidesGrid.Items.Count() - 1), viewbox);
+            this.currentSlide = this.SlidesGrid.Items.Count() - 2;
         }
 
         public async void updateSlide(StorageFile file, Brush backgroundColor)
@@ -76,45 +101,54 @@ namespace MyLecture.Controls
             var viewbox = this.SlidesGrid.Items[this.currentSlide] as Viewbox;
             var panel = viewbox.Child as RelativePanel;
             panel.Background = backgroundColor;
-            var inkCanvas = new InkCanvas();
-            RelativePanel.SetAlignBottomWithPanel(inkCanvas, true);
-            RelativePanel.SetAlignLeftWithPanel(inkCanvas, true);
-            RelativePanel.SetAlignTopWithPanel(inkCanvas, true);
-            RelativePanel.SetAlignRightWithPanel(inkCanvas, true);
-            using (var outputStream = await file.OpenAsync(FileAccessMode.ReadWrite))
-            {
-                await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(outputStream);
-            }
             panel.Children.Clear();
-            panel.Children.Add(inkCanvas);
-            this.SlidesGrid.Items.RemoveAt(this.currentSlide);
-            this.SlidesGrid.Items.Insert(this.currentSlide, viewbox);
+            if (file != null)
+            {                
+                var inkCanvas = new InkCanvas();
+                RelativePanel.SetAlignBottomWithPanel(inkCanvas, true);
+                RelativePanel.SetAlignLeftWithPanel(inkCanvas, true);
+                RelativePanel.SetAlignTopWithPanel(inkCanvas, true);
+                RelativePanel.SetAlignRightWithPanel(inkCanvas, true);
+                using (var inputStream = await file.OpenAsync(FileAccessMode.Read))
+                {
+                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
+                    inputStream.Dispose();
+                }
+                panel.Children.Add(inkCanvas);
+                this.SlidesGrid.Items.RemoveAt(this.currentSlide);
+                this.SlidesGrid.Items.Insert(this.currentSlide, viewbox);
 
 
-            StorageFile slide = await this.slidesFolder.CreateFileAsync("Slide" + this.currentSlide + ".ink", CreationCollisionOption.ReplaceExisting);
-            using (var outputStream = await slide.OpenAsync(FileAccessMode.ReadWrite))
-            {
-                await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
+                StorageFile slide = await this.slidesFolder.CreateFileAsync("Slide" + this.currentSlide + ".ink", CreationCollisionOption.ReplaceExisting);
+                using (var outputStream = await slide.OpenAsync(FileAccessMode.ReadWrite))
+                {
+                    await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
+                    outputStream.Dispose();
+                }
+                this.slides[this.currentSlide] = slide;
             }
-            this.slides[this.currentSlide] = slide;
-        }
-
-        private void SlidesGrid_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            this.currentSlide = this.SlidesGrid.Items.IndexOf(e.ClickedItem);
-            this.SelectionMade(sender, new EventArgs());
+            else
+            {
+                this.slides[this.currentSlide] = null;
+            }
         }
 
         private void SlidesGrid_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            this.currentSlide = this.SlidesGrid.Items.IndexOf(this.SlidesGrid.SelectedItem);
-            this.SelectionMade(sender, new EventArgs());
-        }
-
-        private void TextBlock_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-            this.createNewSlide();
-            this.NewSlideCreated(sender, new EventArgs());
+            var itemIndex = this.SlidesGrid.Items.IndexOf(this.SlidesGrid.SelectedItem);
+            if (itemIndex == this.SlidesGrid.Items.Count() - 1)
+            {
+                this.createNewSlide();
+                this.NewSlideCreated(sender, new EventArgs());
+            }
+            else
+            {
+                if (this.currentSlide != this.SlidesGrid.Items.IndexOf(this.SlidesGrid.SelectedItem))
+                {
+                    this.currentSlide = this.SlidesGrid.Items.IndexOf(this.SlidesGrid.SelectedItem);
+                    this.SelectionMade(sender, new EventArgs());
+                }
+            }
         }
     }
 }

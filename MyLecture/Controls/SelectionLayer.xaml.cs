@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -15,13 +16,10 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI.Xaml.Shapes;
 
-// The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
-
 namespace MyLecture.Controls
 {
     public sealed partial class SelectionLayer : UserControl
     {
-        private uint pointer;
         private Polygon selectionLasso;
 
         public delegate void SelectionMadeHandler(object sender, EventArgs e);
@@ -43,7 +41,6 @@ namespace MyLecture.Controls
         private void SelectionCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
             this.SelectionCanvas.Children.Clear();
-            this.pointer = e.Pointer.PointerId;
             var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
             this.selectionLasso = new Polygon();
             this.selectionLasso.Stroke = new SolidColorBrush(Colors.Gray);
@@ -56,29 +53,25 @@ namespace MyLecture.Controls
             };
             this.selectionLasso.Points = points;
             this.SelectionCanvas.Children.Add(this.selectionLasso);
+            this.SelectionCanvas.PointerPressed -= SelectionCanvas_PointerPressed;
+            this.SelectionCanvas.PointerMoved += SelectionCanvas_PointerMoved;
+            this.SelectionCanvas.PointerReleased += SelectionCanvas_PointerReleased;
         }
 
         private void SelectionCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
         {
-            if (this.pointer == e.Pointer.PointerId)
-            {                
-                var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
-                this.selectionLasso.Points.Add(currentPoint);
-            }
+            var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
+            Debug.WriteLine(currentPoint.X + "," + currentPoint.Y);
+            this.selectionLasso.Points.Add(currentPoint);
+            e.Handled = true;
         }
 
         private void SelectionCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
         {
-            if (this.pointer != 0)
-            {
-                this.pointer = 0;
+            this.SelectionCanvas.PointerMoved -= SelectionCanvas_PointerMoved;
+            this.SelectionCanvas.PointerReleased -= SelectionCanvas_PointerReleased;
 
-                this.SelectionCanvas.PointerPressed -= SelectionCanvas_PointerPressed;
-                this.SelectionCanvas.PointerMoved -= SelectionCanvas_PointerMoved;
-                this.SelectionCanvas.PointerReleased -= SelectionCanvas_PointerReleased;
-
-                this.SelectionMade(this, new EventArgs());                
-            }
+            this.SelectionMade(this, new EventArgs());
         }
 
         public void showCopyMovePopup(CopyPasteMovePopup cpmPopup)

@@ -11,7 +11,5 @@
 
     <Canvas x:Name="SelectionCanvas"
             PointerPressed="SelectionCanvas_PointerPressed"
-            PointerMoved="SelectionCanvas_PointerMoved"
-            PointerReleased="SelectionCanvas_PointerReleased"
             Background="Transparent"/>
 </UserControl>
