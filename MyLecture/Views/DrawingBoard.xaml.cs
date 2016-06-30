@@ -1,5 +1,6 @@
 ﻿using MyLecture.Controls;
 using MyLecture.IO;
+using MyLecture.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,7 @@ namespace MyLecture.Views
     /// </summary>
     public sealed partial class DrawingBoard : Page
     {
+        private LectureFactory lectureFactory;
         readonly static string FOLDERNAME = "TempFiles";
         readonly static string FILENAME = "Temp{0}.ink";
         readonly static CoreInputDeviceTypes ALL_INPUTS = CoreInputDeviceTypes.Touch | CoreInputDeviceTypes.Mouse | CoreInputDeviceTypes.Pen;
@@ -49,6 +51,9 @@ namespace MyLecture.Views
         {
             base.OnNavigatedTo(e);
 
+            this.lectureFactory = new LectureFactory();
+            this.lectureFactory.CreateNewLecture();
+            this.MainCanvas.InkPresenter.StrokeContainer = this.lectureFactory.OpenSlides();
             this.ReaderWriter = new IOReaderWriter(FOLDERNAME);
             this.ReaderWriter.CreateFolder();
             this.MainCanvas.InkPresenter.StrokesCollected += InkPresenter_StrokesCollected;

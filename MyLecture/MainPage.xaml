@@ -7,5 +7,28 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Frame x:Name="NavFrame"/>
+    <Grid Background="#FF595959">
+        <StackPanel VerticalAlignment="Bottom">
+            <Button x:Name="NewLectureButton"
+                    HorizontalAlignment="Stretch"
+                    Content="New Lecture" 
+                    Background="#FF00C57D"
+                    Foreground="White"
+                    FontWeight="SemiBold"
+                    FontSize="24"
+                    Click="NewLectureButton_Click" 
+                    BorderBrush="{x:Null}" 
+                    BorderThickness="0"/>
+            <Button x:Name="OpenLectureButton"
+                    HorizontalAlignment="Stretch"
+                    Content="Open Lecture" 
+                    Background="#FF00915C"
+                    Foreground="White"
+                    FontWeight="SemiBold"
+                    FontSize="24"
+                    Click="OpenLectureButton_Click" 
+                    BorderBrush="{x:Null}" 
+                    BorderThickness="0"/>
+        </StackPanel>
+    </Grid>
 </Page>
