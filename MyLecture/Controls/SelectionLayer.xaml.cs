@@ -32,6 +32,14 @@ namespace MyLecture.Controls
                 return this.selectionLasso.Points.ToList<Point>();
             }
         }
+        public void resetSelection()
+        {
+            this.selectionLasso = null;
+            this.SelectionCanvas.PointerPressed += SelectionCanvas_PointerPressed;
+            this.SelectionCanvas.PointerMoved -= SelectionCanvas_PointerMoved;
+            this.SelectionCanvas.PointerReleased -= SelectionCanvas_PointerReleased;
+            this.SelectionCanvas.Children.Clear();
+        }
 
         public SelectionLayer()
         {
@@ -63,14 +71,12 @@ namespace MyLecture.Controls
             var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
             Debug.WriteLine(currentPoint.X + "," + currentPoint.Y);
             this.selectionLasso.Points.Add(currentPoint);
-            e.Handled = true;
         }
 
         private void SelectionCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
         {
             this.SelectionCanvas.PointerMoved -= SelectionCanvas_PointerMoved;
             this.SelectionCanvas.PointerReleased -= SelectionCanvas_PointerReleased;
-
             this.SelectionMade(this, new EventArgs());
         }
 

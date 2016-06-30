@@ -1,26 +1,22 @@
-﻿using System;
+﻿using MyLecture.IO;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Input.Inking;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 namespace MyLecture.Controls
 {
     public sealed partial class SlidesViewControl : UserControl
     {
-        private StorageFolder slidesFolder;
+        readonly static string FOLDERNAME = "Slides";
+        readonly static string FILENAME = "Slide{0}.ink";
+        private IOReaderWriter ReaderWriter;
         private List<StorageFile> slides = new List<StorageFile>();
         private int currentSlide = 0;
 
@@ -33,11 +29,19 @@ namespace MyLecture.Controls
         public SlidesViewControl()
         {
             this.InitializeComponent();
+
+            this.ReaderWriter = new IOReaderWriter(FOLDERNAME);
+            this.ReaderWriter.CreateFolder();
             this.initialSetup();
-            this.loadSlidesFolder();
         }
 
         private void initialSetup()
+        {
+            this.createAddSlideControl();
+            this.createNewBlankSlide();
+        }
+
+        private void createAddSlideControl()
         {
             this.slides.Add(null);
             SymbolIcon icon = new SymbolIcon(Symbol.Add);
@@ -49,82 +53,61 @@ namespace MyLecture.Controls
             };
             RelativePanel.SetAlignHorizontalCenterWithPanel(iconBox, true);
             RelativePanel.SetAlignVerticalCenterWithPanel(iconBox, true);
+            RelativePanel panel = this.createNewSlidePanel(iconBox);
+            Viewbox viewbox = new Viewbox();
+            viewbox.Child = panel;
+            this.SlidesGrid.Items.Add(viewbox);
+        }
+
+        private RelativePanel createNewSlidePanel(UIElement element)
+        {
             RelativePanel panel = new RelativePanel()
             {
                 Width = 1600,
                 Height = 1000,
                 Background = new SolidColorBrush(Colors.White)
             };
-            panel.Children.Add(iconBox);
-            Viewbox viewbox = new Viewbox();
-            viewbox.Child = panel;
-            this.SlidesGrid.Items.Add(viewbox);
-            this.createNewSlide();
+            if (element != null)
+            {
+                panel.Children.Add(element);
+            }
+            return panel;
         }
 
-        public StorageFile getSlide()
+        private StorageFile getSlide()
         {
             return this.slides[this.currentSlide];
         }
 
-        private async void loadSlidesFolder()
-        {
-            try
-            {
-                this.slidesFolder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Slides");
-                await this.slidesFolder.DeleteAsync();
-                this.slidesFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Slides");
-            }
-            catch
-            {
-                this.slidesFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Slides");
-            }
-        }
-
-        private void createNewSlide()
+        private void createNewBlankSlide()
         {
             this.slides.Add(null);
-            RelativePanel panel = new RelativePanel()
-            {
-                Width = 1600,
-                Height = 1000,
-                Background = new SolidColorBrush(Colors.White)
-            };
+            RelativePanel panel = this.createNewSlidePanel(null);
             Viewbox viewbox = new Viewbox();
             viewbox.Child = panel;
             this.SlidesGrid.Items.Insert((this.SlidesGrid.Items.Count() - 1), viewbox);
             this.currentSlide = this.SlidesGrid.Items.Count() - 2;
         }
 
-        public async void updateSlide(StorageFile file, Brush backgroundColor)
+        public async void updateSlide(IOReaderWriter sourceReaderWriter, string fileName, Brush backgroundColor)
         {
             var viewbox = this.SlidesGrid.Items[this.currentSlide] as Viewbox;
             var panel = viewbox.Child as RelativePanel;
             panel.Background = backgroundColor;
             panel.Children.Clear();
-            if (file != null)
+            if (fileName != null)
             {                
                 var inkCanvas = new InkCanvas();
                 RelativePanel.SetAlignBottomWithPanel(inkCanvas, true);
                 RelativePanel.SetAlignLeftWithPanel(inkCanvas, true);
                 RelativePanel.SetAlignTopWithPanel(inkCanvas, true);
                 RelativePanel.SetAlignRightWithPanel(inkCanvas, true);
-                using (var inputStream = await file.OpenAsync(FileAccessMode.Read))
-                {
-                    await inkCanvas.InkPresenter.StrokeContainer.LoadAsync(inputStream);
-                    inputStream.Dispose();
-                }
+                await sourceReaderWriter.LoadInkStrokes(fileName, inkCanvas.InkPresenter.StrokeContainer);
                 panel.Children.Add(inkCanvas);
                 this.SlidesGrid.Items.RemoveAt(this.currentSlide);
                 this.SlidesGrid.Items.Insert(this.currentSlide, viewbox);
 
-
-                StorageFile slide = await this.slidesFolder.CreateFileAsync("Slide" + this.currentSlide + ".ink", CreationCollisionOption.ReplaceExisting);
-                using (var outputStream = await slide.OpenAsync(FileAccessMode.ReadWrite))
-                {
-                    await inkCanvas.InkPresenter.StrokeContainer.SaveAsync(outputStream);
-                    outputStream.Dispose();
-                }
+                StorageFile slide = await this.ReaderWriter.SaveInkStrokes(this.getCurrentFileName(), inkCanvas.InkPresenter.StrokeContainer);
                 this.slides[this.currentSlide] = slide;
             }
             else
@@ -133,12 +116,26 @@ namespace MyLecture.Controls
             }
         }
 
+        public async void updateCanvas(InkStrokeContainer sourceInkContainer)
+        {
+            var file = this.getSlide();
+            if (file != null)
+            {
+                await this.ReaderWriter.LoadInkStrokes(file.Name, sourceInkContainer);
+            }
+        }
+
+        private string getCurrentFileName()
+        {
+            return string.Format(FILENAME, this.currentSlide);
+        }
+
         private void SlidesGrid_Tapped(object sender, TappedRoutedEventArgs e)
         {
             var itemIndex = this.SlidesGrid.Items.IndexOf(this.SlidesGrid.SelectedItem);
             if (itemIndex == this.SlidesGrid.Items.Count() - 1)
             {
-                this.createNewSlide();
+                this.createNewBlankSlide();
                 this.NewSlideCreated(sender, new EventArgs());
             }
             else

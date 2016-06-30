@@ -102,10 +102,10 @@
     <Compile Include="Controls\SelectionLayer.xaml.cs">
       <DependentUpon>SelectionLayer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\SlideCapture.cs" />
     <Compile Include="Controls\SlidesViewControl.xaml.cs">
       <DependentUpon>SlidesViewControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="IO\IOReaderWriter.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

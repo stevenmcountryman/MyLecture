@@ -61,10 +61,17 @@
                             Height="1000"
                             Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                 <InkCanvas x:Name="MainCanvas"    
-                   RelativePanel.AlignBottomWithPanel="True"
-                   RelativePanel.AlignLeftWithPanel="True"
-                   RelativePanel.AlignRightWithPanel="True"
-                   RelativePanel.AlignTopWithPanel="True"/>
+                           RelativePanel.AlignBottomWithPanel="True"
+                           RelativePanel.AlignLeftWithPanel="True"
+                           RelativePanel.AlignRightWithPanel="True"
+                           RelativePanel.AlignTopWithPanel="True"/>
+                <controls:SelectionLayer x:Name="SelectionCanvas"
+                                         Visibility="Collapsed"
+                                         RelativePanel.AlignBottomWithPanel="True"
+                                         RelativePanel.AlignLeftWithPanel="True"
+                                         RelativePanel.AlignRightWithPanel="True"
+                                         RelativePanel.AlignTopWithPanel="True"
+                                         SelectionMade="SelectionLayer_SelectionMade"/>
             </RelativePanel>
         </Viewbox>
 
