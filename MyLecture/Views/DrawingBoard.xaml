@@ -140,8 +140,8 @@
                                     RelativePanel.AlignRightWithPanel="True"
                                     RelativePanel.AlignTopWithPanel="True"
                                     Width="400"
-                                    SelectionMade="SlidesView_SelectionMade"
-                                    NewSlideCreated="SlidesView_NewSlideCreated">
+                                    ChooseSlide="SlidesView_ChooseSlide"
+                                    CreateNewSlide="SlidesView_CreateNewSlide">
             <controls:SlidesViewControl.RenderTransform>
                 <TranslateTransform x:Name="SlidesViewTranslate" X="400" />
             </controls:SlidesViewControl.RenderTransform>

@@ -44,11 +44,17 @@ namespace MyLecture.Models
             return this.Slides[index];
         }
 
-        public void AddNewBlankSlide()
+        public InkStrokeContainer AddNewBlankSlide()
         {
             this.Slides.Add(new InkStrokeContainer());
+            return this.Slides.Last();
         }
 
+        public void ClearSnapshots()
+        {
+            this.TempFiles.Clear();
+            this.tempFileIndex = -1;
+        }
         public async void SaveSnapshot(InkStrokeContainer inkStrokes)
         {
             this.tempFileIndex++;
@@ -56,7 +62,7 @@ namespace MyLecture.Models
             {
                 this.TempFiles.RemoveRange(this.tempFileIndex, this.TempFiles.Count() - this.tempFileIndex);
             }
-            if (inkStrokes != null)
+            if (inkStrokes.GetStrokes().Count() > 0)
             {
                 var tempFile = await this.ReaderWriter.SaveSnapshot(inkStrokes, this.tempFileIndex);                
                 this.TempFiles.Add(tempFile);
@@ -66,11 +72,19 @@ namespace MyLecture.Models
                 this.TempFiles.Add(null);
             }
         }
+        public bool CanGoBack()
+        {
+            return tempFileIndex > 0;
+        }
+        public bool CanGoForward()
+        {
+            return this.tempFileIndex < this.TempFiles.Count() - 1;
+        }
         public InkStrokeContainer LoadPreviousSnapshot()
         {
-            if (this.tempFileIndex - 1 >= 0)
+            this.tempFileIndex--;
+            if (tempFileIndex >= 0)
             {
-                this.tempFileIndex--;
                 return this.TempFiles[this.tempFileIndex];
             }
             else
@@ -80,9 +94,9 @@ namespace MyLecture.Models
         }
         public InkStrokeContainer LoadNextSnapshot()
         {
-            if (this.tempFileIndex + 1 < this.TempFiles.Count())
+            this.tempFileIndex++;
+            if (this.tempFileIndex < this.TempFiles.Count())
             {
-                this.tempFileIndex++;
                 return this.TempFiles[this.tempFileIndex];
             }
             else
@@ -93,8 +107,15 @@ namespace MyLecture.Models
 
         public async void SaveSlide(InkStrokeContainer inkStrokes, int slideIndex)
         {
-            var slide = await this.ReaderWriter.SaveSlide(inkStrokes);
-            this.Slides[slideIndex] = slide;
+            if (inkStrokes.GetStrokes().Count() > 0)
+            {
+                var slide = await this.ReaderWriter.SaveSlide(inkStrokes);
+                this.Slides[slideIndex] = slide;
+            }
+            else
+            {
+                this.Slides[slideIndex] = inkStrokes;
+            }
         }
 
         public void SaveLecture()

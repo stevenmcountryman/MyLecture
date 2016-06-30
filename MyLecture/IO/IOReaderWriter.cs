@@ -51,15 +51,15 @@ namespace MyLecture.IO
         public async Task<InkStrokeContainer> SaveSnapshot(InkStrokeContainer inkStrokes, int index)
         {
             var fileName = string.Format(TEMPFILE, index);
-            this.saveInkStrokesToFile(inkStrokes, fileName);
+            await this.saveInkStrokesToFile(inkStrokes, fileName);
             return await this.loadInkStrokesFromFile(fileName);
         }
         public async Task<InkStrokeContainer> SaveSlide(InkStrokeContainer inkStrokes)
         {
-            this.saveInkStrokesToFile(inkStrokes, SLIDEFILE);
+            await this.saveInkStrokesToFile(inkStrokes, SLIDEFILE);
             return await this.loadInkStrokesFromFile(SLIDEFILE);
         }
-        private async void saveInkStrokesToFile(InkStrokeContainer inkStrokes, string fileName)
+        private async Task saveInkStrokesToFile(InkStrokeContainer inkStrokes, string fileName)
         {
             var file = await this.createFile(this.TempFolder, fileName);
             var writeStream = await file.OpenAsync(FileAccessMode.ReadWrite);
@@ -82,56 +82,11 @@ namespace MyLecture.IO
             return inkStrokes;
         }
 
-        /// <summary>
-        /// Creates the folder for reading and writing to
-        /// </summary>
-        public async void CreateFolder()
-        {
-            this.Folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync(this.FolderName, CreationCollisionOption.ReplaceExisting);
-        }
-
         private async void CreateFolderHierarchy()
         {
             this.LectureFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync(LECTUREFOLDER, CreationCollisionOption.ReplaceExisting);
             this.TempFolder = await this.LectureFolder.CreateFolderAsync(TEMPFOLDER, CreationCollisionOption.ReplaceExisting);
         }
-
-        /// <summary>
-        /// Saves the specified InkStrokeContainer to a given file name
-        /// </summary>
-        /// <param name="fileName">The name of the file to create for the Ink Strokes</param>
-        /// <param name="strokes">The InkStrokeContainer object needed to save</param>
-        /// <returns>The StorageFile object associated with the created file</returns>
-        public async Task<StorageFile> SaveInkStrokes(string fileName, InkStrokeContainer strokes)
-        {
-            var file = await this.createFile(this.TempFolder, fileName);
-            var writeStream = await file.OpenAsync(FileAccessMode.ReadWrite);
-            using (writeStream)
-            {
-                await strokes.SaveAsync(writeStream);
-                writeStream.Dispose();
-            }
-            return file;
-        }
-
-        /// <summary>
-        /// Saves the specified InkStrokeContainer to a given file name
-        /// </summary>
-        /// <param name="fileName">The name of the file to create for the Ink Strokes</param>
-        /// <param name="strokes">The InkStrokeContainer object needed to save</param>
-        /// <returns>The StorageFile object associated with the created file</returns>
-        public async Task<StorageFile> LoadInkStrokes(string fileName, InkStrokeContainer strokes)
-        {
-            var file = await this.getFile(this.TempFolder, fileName);
-            var readStream = await file.OpenAsync(FileAccessMode.Read);
-            using (readStream)
-            {
-                await strokes.LoadAsync(readStream);
-                readStream.Dispose();
-            }
-            return file;
-        }
-
         private async Task<StorageFile> createFile(StorageFolder folder, string fileName)
         {
             return await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);

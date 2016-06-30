@@ -24,11 +24,8 @@ namespace MyLecture.Views
     public sealed partial class DrawingBoard : Page
     {
         private LectureFactory lectureFactory;
-        readonly static string FOLDERNAME = "TempFiles";
-        readonly static string FILENAME = "Temp{0}.ink";
         readonly static CoreInputDeviceTypes ALL_INPUTS = CoreInputDeviceTypes.Touch | CoreInputDeviceTypes.Mouse | CoreInputDeviceTypes.Pen;
         readonly static CoreInputDeviceTypes PEN_ONLY = CoreInputDeviceTypes.Pen;
-        private IOReaderWriter ReaderWriter;
 
         private Boolean isCanvasWhite = true;
         private SolidColorBrush whiteColor = new SolidColorBrush(Colors.White);
@@ -36,8 +33,6 @@ namespace MyLecture.Views
         private bool canTouchInk = false;
         private InkToolbarToolButton lastTool;
         private Point lastpoint;
-        private int tempFileCount = 0;
-        private int maxTempFile = 0;
 
         /// <summary>
         /// Creates a new DrawingBoard object for inking
@@ -54,8 +49,6 @@ namespace MyLecture.Views
             this.lectureFactory = new LectureFactory();
             this.lectureFactory.CreateNewLecture();
             this.MainCanvas.InkPresenter.StrokeContainer = this.lectureFactory.OpenSlides();
-            this.ReaderWriter = new IOReaderWriter(FOLDERNAME);
-            this.ReaderWriter.CreateFolder();
             this.MainCanvas.InkPresenter.StrokesCollected += InkPresenter_StrokesCollected;
             this.MainCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
         }
@@ -121,10 +114,10 @@ namespace MyLecture.Views
         }
         private void clearCanvas()
         {
-            this.MainCanvas.InkPresenter.StrokeContainer.Clear();
-            this.resetTempFolder();
+            this.MainCanvas.InkPresenter.StrokeContainer = new InkStrokeContainer();
+            this.resetSnapshotMemory();
         }
-        private async void updateInkCanvasAndTools()
+        private void updateInkCanvasAndTools()
         {
             this.UndoTool.IsEnabled = true;
             this.RedoTool.IsEnabled = false;
@@ -137,7 +130,9 @@ namespace MyLecture.Views
             {
                 this.SelectionTool.IsEnabled = false;
             }
-            await this.saveTempFile();
+            this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+            this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
+            this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.InkPanel.Background);
         }
         private void toggleTouchInking(bool canTouch)
         {
@@ -193,33 +188,11 @@ namespace MyLecture.Views
         #endregion
 
         #region IOReadWrite Helpers
-        private async Task saveTempFile()
+        private void resetSnapshotMemory()
         {
-            if (!this.isMainCanvasEmpty())
-            {
-                this.tempFileCount++;
-                this.maxTempFile = this.tempFileCount;
-                await this.ReaderWriter.SaveInkStrokes(this.getCurrentFileName(), this.MainCanvas.InkPresenter.StrokeContainer);
-                this.SlidesView.updateSlide(this.ReaderWriter, this.getCurrentFileName(), this.InkPanel.Background);
-            }
-        }
-        private string getCurrentFileName()
-        {
-            return string.Format(FILENAME, this.tempFileCount);
-        }
-        private async Task loadTempFile()
-        {
-            await this.ReaderWriter.LoadInkStrokes(this.getCurrentFileName(), this.MainCanvas.InkPresenter.StrokeContainer);
-            this.SlidesView.updateSlide(this.ReaderWriter, this.getCurrentFileName(), this.InkPanel.Background);
-        }
-        private async void resetTempFolder()
-        {
-            this.ReaderWriter.CreateFolder();
-            this.tempFileCount = 0;
-            this.maxTempFile = 0;
             this.UndoTool.IsEnabled = false;
             this.RedoTool.IsEnabled = false;
-            await this.saveTempFile();
+            this.lectureFactory.ClearSnapshots();
         }
         #endregion
 
@@ -314,44 +287,54 @@ namespace MyLecture.Views
         #endregion
 
         #region Undo/Redo Logic
-        private async void processUndo()
+        private void processUndo()
         {
-            this.tempFileCount--;
-            this.toggleUndoAndRedoButtons();
-            if (this.tempFileCount == 0 || (await this.ReaderWriter.Folder.GetFilesAsync()).Count == 1)
+            var snapshot = this.lectureFactory.LoadPreviousSnapshot();
+            if (snapshot != null)
             {
-                this.MainCanvas.InkPresenter.StrokeContainer.Clear();
-                this.SlidesView.updateSlide(this.ReaderWriter, null, this.InkPanel.Background);
+                this.MainCanvas.InkPresenter.StrokeContainer = snapshot;
             }
             else
             {
-                await this.loadTempFile();
+                this.MainCanvas.InkPresenter.StrokeContainer = new InkStrokeContainer();
             }
+            this.updateUndoRedoTools();
+            this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
         }
-        private async void processRedo()
+        private void processRedo()
         {
-            this.tempFileCount++;
-            this.toggleUndoAndRedoButtons();
-            await this.loadTempFile();
+            var snapshot = this.lectureFactory.LoadNextSnapshot();
+            if (snapshot != null)
+            {
+                this.MainCanvas.InkPresenter.StrokeContainer = snapshot;
+            }
+            else
+            {
+                this.MainCanvas.InkPresenter.StrokeContainer = new InkStrokeContainer();
+            }
+            this.updateUndoRedoTools();
+            this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
         }
-        private void toggleUndoAndRedoButtons()
+        private void updateUndoRedoTools()
         {
             this.UndoTool.IsChecked = false;
             this.RedoTool.IsChecked = false;
             this.MainInkToolbar.ActiveTool = this.lastTool;
-
-            if (this.tempFileCount == 0)
+            if (this.lectureFactory.CanGoBack())
             {
-                this.UndoTool.IsEnabled = false;
-            }
-            else if (this.tempFileCount == this.maxTempFile)
-            {
-                this.RedoTool.IsEnabled = false;
+                this.UndoTool.IsEnabled = true;
             }
             else
             {
+                this.UndoTool.IsEnabled = false;
+            }
+            if (this.lectureFactory.CanGoForward())
+            {
                 this.RedoTool.IsEnabled = true;
-                this.UndoTool.IsEnabled = true;
+            }
+            else
+            {
+                this.RedoTool.IsEnabled = false;
             }
         }
         #endregion
@@ -361,15 +344,20 @@ namespace MyLecture.Views
         {
             this.openSlidesView();
         }
-        private void SlidesView_NewSlideCreated(object sender, EventArgs e)
+        private void SlidesView_ChooseSlide(object sender, EventArgs e)
         {
             this.clearCanvas();
+            var chosenSlide = this.lectureFactory.GetSlideAt(this.SlidesView.SlideIndex);
+            this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
+            this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
             this.closeSlidesView();
         }
-        private void SlidesView_SelectionMade(object sender, EventArgs e)
+        private void SlidesView_CreateNewSlide(object sender, EventArgs e)
         {
             this.clearCanvas();
-            this.SlidesView.updateCanvas(this.MainCanvas.InkPresenter.StrokeContainer);
+            var newSlide = this.lectureFactory.AddNewBlankSlide();
+            this.MainCanvas.InkPresenter.StrokeContainer = newSlide;
+            this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
             this.closeSlidesView();
         }
         private void openSlidesView()
