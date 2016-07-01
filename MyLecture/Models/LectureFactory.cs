@@ -135,6 +135,7 @@ namespace MyLecture.Models
             savePicker.SuggestedFileName = "UntitledLecture";
 
             StorageFile file = await savePicker.PickSaveFileAsync();
+            StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFileToken", file);
             await this.ReaderWriter.SaveAllSlides(this.Slides, file);
         }
 
