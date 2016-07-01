@@ -3,9 +3,13 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.AccessCache;
+using Windows.Storage.Pickers;
 using Windows.UI.Input.Inking;
 
 namespace MyLecture.Models
@@ -24,11 +28,6 @@ namespace MyLecture.Models
             this.tempFileIndex = -1;
         }
 
-        public void OpenExistingLecture()
-        {
-            //this.Slides = deserialized slides file
-        }
-
         public void CreateNewLecture()
         {
             this.createNewSlideCollection();
@@ -42,6 +41,11 @@ namespace MyLecture.Models
         public InkStrokeContainer GetSlideAt(int index)
         {
             return this.Slides[index];
+        }
+
+        public List<InkStrokeContainer> GetAllSlides()
+        {
+            return this.Slides;
         }
 
         public InkStrokeContainer AddNewBlankSlide()
@@ -119,19 +123,29 @@ namespace MyLecture.Models
         }
 
         public void SaveLecture()
-        {
-            var serializer = new JsonSerializer();
-            using (StreamWriter writer = File.CreateText("Untitled.smc"))
-            {
-                var jsonWriter = new JsonTextWriter(writer);
-                serializer.Serialize(jsonWriter, Slides);
-                writer.Dispose();
-            }
+        {           
+
         }
 
-        public void SaveLectureAs()
+        public async void SaveLectureAs()
         {
+            var savePicker = new FileSavePicker();
+            savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            savePicker.FileTypeChoices.Add("InkLecture", new List<string>() { ".smc" });
+            savePicker.SuggestedFileName = "UntitledLecture";
 
+            StorageFile file = await savePicker.PickSaveFileAsync();
+            await this.ReaderWriter.SaveAllSlides(this.Slides, file);   
+        }
+
+        public async Task OpenExistingLecture()
+        {
+            var openPicker = new FileOpenPicker();
+            openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            openPicker.FileTypeFilter.Add(".smc");
+
+            StorageFile file = await openPicker.PickSingleFileAsync();
+            this.Slides = await this.ReaderWriter.OpenAllSlides(file);
         }
 
         public void ExportToPDF()

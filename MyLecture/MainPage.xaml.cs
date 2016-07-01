@@ -1,4 +1,5 @@
-﻿using MyLecture.Views;
+﻿using MyLecture.Models;
+using MyLecture.Views;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -19,9 +20,11 @@ namespace MyLecture
             this.Frame.Navigate(typeof(DrawingBoard));
         }
 
-        private void OpenLectureButton_Click(object sender, RoutedEventArgs e)
+        private async void OpenLectureButton_Click(object sender, RoutedEventArgs e)
         {
-
+            LectureFactory lectureFactory = new LectureFactory();
+            await lectureFactory.OpenExistingLecture();
+            this.Frame.Navigate(typeof(DrawingBoard), lectureFactory);
         }
     }
 }

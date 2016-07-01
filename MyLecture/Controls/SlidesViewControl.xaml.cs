@@ -9,16 +9,27 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Animation;
 
 namespace MyLecture.Controls
 {
     public sealed partial class SlidesViewControl : UserControl
     {
+        readonly static int HIDDEN = -400;
+        readonly static int VISIBLE = 0;
+        readonly static Color TRANSPARENT = Color.FromArgb(0, 0, 0, 0);
+        readonly static Color TRANSLUCENT = Color.FromArgb(100, 0, 0, 0);
         public delegate void SelectionMadeHandler(object sender, EventArgs e);
         public event SelectionMadeHandler ChooseSlide;
 
         public delegate void NewSlideHandler(object sender, EventArgs e);
         public event NewSlideHandler CreateNewSlide;
+
+        public delegate void SlidesClosedHandler(object sender, EventArgs e);
+        public event SlidesClosedHandler SlidesClosed;
+
+        public delegate void SaveButtonTapHandler(object sender, EventArgs e);
+        public event SaveButtonTapHandler SaveButtonTapped;
 
         public int SlideIndex
         {
@@ -31,6 +42,43 @@ namespace MyLecture.Controls
             this.InitializeComponent();
             this.createAddSlideControl();
             this.createNewBlankSlide();
+        }
+
+        public void OpenSlidesView()
+        {
+            this.SlidesViewAnimation.From = HIDDEN;
+            this.SlidesViewAnimation.To = VISIBLE;
+            this.BackgroundOpacity.From = TRANSPARENT;
+            this.BackgroundOpacity.To = TRANSLUCENT;
+            this.SlidesViewSlide.Begin();
+        }
+
+        public void CloseSlidesView()
+        {
+            this.SlidesViewAnimation.From = VISIBLE;
+            this.SlidesViewAnimation.To = HIDDEN;
+            this.BackgroundOpacity.From = TRANSLUCENT;
+            this.BackgroundOpacity.To = TRANSPARENT;
+            this.SlidesViewSlide.Completed += SlidesViewSlide_Completed;
+            this.SlidesViewSlide.Begin();
+        }
+
+        public void ShowLoadedSlides(List<InkStrokeContainer> slides)
+        {
+            this.UpdateSlide(slides[0], new SolidColorBrush(Colors.White));
+            for (int i = 1; i < slides.Count(); i++)
+            {
+                this.SlideIndex++;
+                this.createNewBlankSlide();
+                this.UpdateSlide(slides[i], new SolidColorBrush(Colors.White));
+            }
+            this.SlideIndex = 0;
+        }
+
+        private void SlidesViewSlide_Completed(object sender, object e)
+        {
+            this.SlidesViewSlide.Completed -= SlidesViewSlide_Completed;
+            this.SlidesClosed(this, new EventArgs());
         }
 
         private void createAddSlideControl()
@@ -100,6 +148,16 @@ namespace MyLecture.Controls
             {
                 this.ChooseSlide(sender, new EventArgs());
             }
+        }
+
+        private void BackgroundShade_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            this.CloseSlidesView();
+        }
+
+        private void SaveButton_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            this.SaveButtonTapped(sender, new EventArgs());
         }
     }
 }

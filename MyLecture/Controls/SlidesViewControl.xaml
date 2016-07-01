@@ -6,22 +6,58 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignHeight="300"
-    d:DesignWidth="400">
+    d:DesignHeight="1000"
+    d:DesignWidth="1000">
 
-    <RelativePanel Background="Gray">
-        <TextBlock x:Name="TitleText"
+    <UserControl.Resources>
+        <Storyboard x:Name="SlidesViewSlide">
+            <DoubleAnimation x:Name="SlidesViewAnimation" Duration="0:0:0.1" Storyboard.TargetName="SlidesViewTranslate" Storyboard.TargetProperty="X" >
+                <DoubleAnimation.EasingFunction>
+                    <QuadraticEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <ColorAnimation x:Name="BackgroundOpacity" Duration="0:0:0.2" Storyboard.TargetName="BackgroundColor" Storyboard.TargetProperty="Color" />
+        </Storyboard>
+    </UserControl.Resources>
+    
+    <RelativePanel>
+        <Rectangle x:Name="BackgroundShade"
+                   RelativePanel.AlignLeftWithPanel="True"
+                   RelativePanel.AlignTopWithPanel="True"
+                   RelativePanel.AlignBottomWithPanel="True"
+                   RelativePanel.AlignRightWithPanel="True" Tapped="BackgroundShade_Tapped">
+            <Rectangle.Fill>
+                <SolidColorBrush x:Name="BackgroundColor" Color="Transparent"/>
+            </Rectangle.Fill>
+        </Rectangle>
+        <RelativePanel RelativePanel.AlignLeftWithPanel="True"
+                       RelativePanel.AlignTopWithPanel="True"
+                       RelativePanel.AlignBottomWithPanel="True"
+                       Background="#FF444444"
+                       Width="400">
+            <RelativePanel.RenderTransform>
+                <TranslateTransform x:Name="SlidesViewTranslate" X="-400" />
+            </RelativePanel.RenderTransform>
+            <TextBlock x:Name="TitleText"
                         Text="Slides"
                        Margin="24,24,24,0"
                        FontSize="24"
                        Foreground="White"
                        FontWeight="Bold"/>
-        <GridView x:Name="SlidesGrid" 
+            <SymbolIcon x:Name="SaveButton"
+                        Symbol="Save"
+                        Margin="24,24,24,0"
+                        Foreground="White"
+                        RelativePanel.AlignBottomWith="TitleText"
+                        RelativePanel.AlignRightWithPanel="True"
+                        Tapped="SaveButton_Tapped"/>
+            <GridView x:Name="SlidesGrid" 
                        Margin="24,12,24,12"
                       Tapped="SlidesGrid_Tapped"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                   RelativePanel.Below="TitleText"
                   RelativePanel.AlignBottomWithPanel="True">
-        </GridView>
+            </GridView>
+        </RelativePanel>        
     </RelativePanel>
 </UserControl>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,10 +18,13 @@ namespace MyLecture.IO
     {
         readonly static string LECTUREFOLDER = "Lecture_Root";
         readonly static string TEMPFOLDER = "Temp";
+        readonly static string SAVEFOLDER = "Save";
         readonly static string SLIDEFILE = "Slide.ink";
+        readonly static string SLIDESAVEFILE = "Slide{0}.ink";
         readonly static string TEMPFILE = "Temp{0}.ink";
         private StorageFolder LectureFolder;
         private StorageFolder TempFolder;
+        private StorageFolder SaveFolder;
         /// <summary>
         /// The StorageFolder object associated with the Folder used by this object
         /// </summary>
@@ -48,31 +53,80 @@ namespace MyLecture.IO
             this.FolderName = folderName;
         }
         
+        public async Task SaveAllSlides(List<InkStrokeContainer> allSlides, StorageFile destination)
+        {
+            this.SaveFolder = await this.LectureFolder.CreateFolderAsync(SAVEFOLDER, CreationCollisionOption.ReplaceExisting);
+            int slideIndex = 0;
+            foreach (InkStrokeContainer slide in allSlides)
+            {
+                var fileName = string.Format(SLIDESAVEFILE, slideIndex);
+                var file = await this.saveInkStrokesToFile(slide, fileName, this.SaveFolder);
+                await Task.Run(() =>
+                {
+                    using (FileStream stream = new FileStream(destination.Path, FileMode.Open))
+                    {
+                        using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Update))
+                        {
+                            archive.CreateEntryFromFile(file.Path, fileName);
+                        }
+                    }
+                });
+                slideIndex++;
+            }
+        }
+        public async Task<List<InkStrokeContainer>> OpenAllSlides(StorageFile file)
+        {
+            List<InkStrokeContainer> allSlides = new List<InkStrokeContainer>();
+            this.SaveFolder = await this.LectureFolder.CreateFolderAsync(SAVEFOLDER, CreationCollisionOption.ReplaceExisting);
+            int slideIndex = 0;
+            await Task.Run(() =>
+            {
+                using (ZipArchive archive = ZipFile.OpenRead(file.Path))
+                {
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        if (entry.FullName.EndsWith(".ink", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var fileName = string.Format(SLIDESAVEFILE, slideIndex);
+                            entry.ExtractToFile(Path.Combine(this.SaveFolder.Path, fileName));
+                        }
+                        slideIndex++;
+                    }
+                }
+            });
+            for(int i = 0; i < slideIndex; i++)
+            {
+                InkStrokeContainer inkStrokes = await this.loadInkStrokesFromFile(string.Format(SLIDESAVEFILE, i), this.SaveFolder);
+                allSlides.Add(inkStrokes);
+            }
+            return allSlides;
+        }
         public async Task<InkStrokeContainer> SaveSnapshot(InkStrokeContainer inkStrokes, int index)
         {
             var fileName = string.Format(TEMPFILE, index);
-            await this.saveInkStrokesToFile(inkStrokes, fileName);
-            return await this.loadInkStrokesFromFile(fileName);
+            await this.saveInkStrokesToFile(inkStrokes, fileName, this.TempFolder);
+            return await this.loadInkStrokesFromFile(fileName, this.TempFolder);
         }
         public async Task<InkStrokeContainer> SaveSlide(InkStrokeContainer inkStrokes)
         {
-            await this.saveInkStrokesToFile(inkStrokes, SLIDEFILE);
-            return await this.loadInkStrokesFromFile(SLIDEFILE);
+            await this.saveInkStrokesToFile(inkStrokes, SLIDEFILE, this.TempFolder);
+            return await this.loadInkStrokesFromFile(SLIDEFILE, this.TempFolder);
         }
-        private async Task saveInkStrokesToFile(InkStrokeContainer inkStrokes, string fileName)
+        private async Task<StorageFile> saveInkStrokesToFile(InkStrokeContainer inkStrokes, string fileName, StorageFolder folder)
         {
-            var file = await this.createFile(this.TempFolder, fileName);
+            var file = await this.createFile(folder, fileName);
             var writeStream = await file.OpenAsync(FileAccessMode.ReadWrite);
             using (writeStream)
             {
                 await inkStrokes.SaveAsync(writeStream);
                 writeStream.Dispose();
             }
+            return file;
         }
-        private async Task<InkStrokeContainer> loadInkStrokesFromFile(string fileName)
+        private async Task<InkStrokeContainer> loadInkStrokesFromFile(string fileName, StorageFolder folder)
         {
             InkStrokeContainer inkStrokes = new InkStrokeContainer();
-            var file = await this.getFile(this.TempFolder, fileName);
+            var file = await this.getFile(folder, fileName);
             var readStream = await file.OpenAsync(FileAccessMode.Read);
             using (readStream)
             {

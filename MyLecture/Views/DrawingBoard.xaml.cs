@@ -46,8 +46,16 @@ namespace MyLecture.Views
         {
             base.OnNavigatedTo(e);
 
-            this.lectureFactory = new LectureFactory();
-            this.lectureFactory.CreateNewLecture();
+            if (e.Parameter != null)
+            {
+                this.lectureFactory = e.Parameter as LectureFactory;
+                this.SlidesView.ShowLoadedSlides(this.lectureFactory.GetAllSlides());
+            }
+            else
+            {
+                this.lectureFactory = new LectureFactory();
+                this.lectureFactory.CreateNewLecture();
+            }
             this.MainCanvas.InkPresenter.StrokeContainer = this.lectureFactory.OpenSlides();
             this.MainCanvas.InkPresenter.StrokesCollected += InkPresenter_StrokesCollected;
             this.MainCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
@@ -131,8 +139,7 @@ namespace MyLecture.Views
                 this.SelectionTool.IsEnabled = false;
             }
             this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
-            this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
-            this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.InkPanel.Background);
+            this.saveSlide();
         }
         private void toggleTouchInking(bool canTouch)
         {
@@ -299,7 +306,7 @@ namespace MyLecture.Views
                 this.MainCanvas.InkPresenter.StrokeContainer = new InkStrokeContainer();
             }
             this.updateUndoRedoTools();
-            this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
+            this.saveSlide();
         }
         private void processRedo()
         {
@@ -313,7 +320,7 @@ namespace MyLecture.Views
                 this.MainCanvas.InkPresenter.StrokeContainer = new InkStrokeContainer();
             }
             this.updateUndoRedoTools();
-            this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
+            this.saveSlide();
         }
         private void updateUndoRedoTools()
         {
@@ -337,12 +344,18 @@ namespace MyLecture.Views
                 this.RedoTool.IsEnabled = false;
             }
         }
+        private void saveSlide()
+        {
+            this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
+            this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.InkPanel.Background);
+        }
         #endregion
 
         #region SlidesView Logic
-        private void SlideViewButton_Click(object sender, RoutedEventArgs e)
+        private void SlideViewButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
             this.openSlidesView();
+            this.SlidesView.SlidesClosed += SlidesView_SlidesClosed;
         }
         private void SlidesView_ChooseSlide(object sender, EventArgs e)
         {
@@ -362,13 +375,22 @@ namespace MyLecture.Views
         }
         private void openSlidesView()
         {
-            this.SlidesViewAnimation.To = 0;
-            this.SlidesViewSlide.Begin();
+            this.SlidesView.Visibility = Visibility.Visible;
+            this.SlidesView.OpenSlidesView();
         }
         private void closeSlidesView()
         {
-            this.SlidesViewAnimation.To = 400;
-            this.SlidesViewSlide.Begin();
+            this.SlidesView.CloseSlidesView();
+        }
+
+        private void SlidesView_SlidesClosed(object sender, EventArgs e)
+        {
+            this.SlidesView.SlidesClosed -= SlidesView_SlidesClosed;
+            this.SlidesView.Visibility = Visibility.Collapsed;
+        }
+        private void SlidesView_SaveButtonTapped(object sender, EventArgs e)
+        {
+            this.lectureFactory.SaveLectureAs();
         }
         #endregion
     }
