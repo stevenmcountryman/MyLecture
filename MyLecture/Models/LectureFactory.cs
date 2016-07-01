@@ -135,7 +135,7 @@ namespace MyLecture.Models
             savePicker.SuggestedFileName = "UntitledLecture";
 
             StorageFile file = await savePicker.PickSaveFileAsync();
-            await this.ReaderWriter.SaveAllSlides(this.Slides, file);   
+            await this.ReaderWriter.SaveAllSlides(this.Slides, file);
         }
 
         public async Task OpenExistingLecture()
@@ -145,6 +145,11 @@ namespace MyLecture.Models
             openPicker.FileTypeFilter.Add(".smc");
 
             StorageFile file = await openPicker.PickSingleFileAsync();
+            this.Slides = await this.ReaderWriter.OpenAllSlides(file);
+        }
+
+        public async Task OpenExistingLecture(StorageFile file)
+        {
             this.Slides = await this.ReaderWriter.OpenAllSlides(file);
         }
 
