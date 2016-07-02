@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Microsoft.Graphics.Canvas;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Storage.Streams;
+using Windows.UI;
 using Windows.UI.Input.Inking;
 
 namespace MyLecture.IO
@@ -19,12 +18,15 @@ namespace MyLecture.IO
         readonly static string LECTUREFOLDER = "Lecture_Root";
         readonly static string TEMPFOLDER = "Temp";
         readonly static string SAVEFOLDER = "Save";
+        readonly static string IMAGESFOLDER = "Lecture Images";
         readonly static string SLIDEFILE = "Slide.ink";
         readonly static string SLIDESAVEFILE = "Slide{0}.ink";
         readonly static string TEMPFILE = "Temp{0}.ink";
+        readonly static string IMAGEFILE = "Slide{0}.jpg";
         private StorageFolder LectureFolder;
         private StorageFolder TempFolder;
         private StorageFolder SaveFolder;
+        private StorageFolder ImagesFolder;
         /// <summary>
         /// The StorageFolder object associated with the Folder used by this object
         /// </summary>
@@ -53,6 +55,30 @@ namespace MyLecture.IO
             this.FolderName = folderName;
         }
         
+        public async Task SaveAllSlidesToImages(List<InkStrokeContainer> allSlides, StorageFolder destination)
+        {
+            this.ImagesFolder = await destination.CreateFolderAsync(IMAGESFOLDER, CreationCollisionOption.ReplaceExisting);
+            CanvasDevice device = CanvasDevice.GetSharedDevice();
+            List<StorageFile> allImages = new List<StorageFile>();
+            int imageIndex = 1;
+            foreach (var slide in allSlides)
+            {
+                CanvasRenderTarget renderTarget = new CanvasRenderTarget(device, 1600, 1000, 96);
+
+                using (var drawingSession = renderTarget.CreateDrawingSession())
+                {
+                    drawingSession.Clear(Colors.White);
+                    drawingSession.DrawInk(slide.GetStrokes());
+                }
+                var file = await this.createFile(this.ImagesFolder, string.Format(IMAGEFILE, imageIndex));
+                using (var fileStream = await file.OpenAsync(FileAccessMode.ReadWrite))
+                {
+                    await renderTarget.SaveAsync(fileStream, CanvasBitmapFileFormat.Jpeg, 1f);
+                }
+                allImages.Add(file);
+                imageIndex++;
+            }
+        }
         public async Task SaveAllSlides(List<InkStrokeContainer> allSlides, StorageFile destination)
         {
             this.SaveFolder = await this.LectureFolder.CreateFolderAsync(SAVEFOLDER, CreationCollisionOption.ReplaceExisting);

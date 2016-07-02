@@ -20,8 +20,6 @@ namespace MyLecture.Controls
 {
     public sealed partial class SelectionLayer : UserControl
     {
-        private Polygon selectionLasso;
-
         public delegate void SelectionMadeHandler(object sender, EventArgs e);
         public event SelectionMadeHandler SelectionMade;
 
@@ -29,12 +27,12 @@ namespace MyLecture.Controls
         {
             get
             {
-                return this.selectionLasso.Points.ToList<Point>();
+                return this.SelectionLasso.Points.ToList<Point>();
             }
         }
         public void resetSelection()
         {
-            this.selectionLasso = null;
+            this.SelectionLasso.Points = new PointCollection();
             this.SelectionCanvas.PointerPressed += SelectionCanvas_PointerPressed;
             this.SelectionCanvas.PointerMoved -= SelectionCanvas_PointerMoved;
             this.SelectionCanvas.PointerReleased -= SelectionCanvas_PointerReleased;
@@ -48,19 +46,9 @@ namespace MyLecture.Controls
 
         private void SelectionCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-            this.SelectionCanvas.Children.Clear();
             var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
-            this.selectionLasso = new Polygon();
-            this.selectionLasso.Stroke = new SolidColorBrush(Colors.Gray);
-            this.selectionLasso.Fill = new SolidColorBrush(Colors.Transparent);
-            this.selectionLasso.StrokeThickness = 2;
-            this.selectionLasso.StrokeDashArray = new DoubleCollection() { 2 };
-            PointCollection points = new PointCollection()
-            {
-                new Point(currentPoint.X, currentPoint.Y)
-            };
-            this.selectionLasso.Points = points;
-            this.SelectionCanvas.Children.Add(this.selectionLasso);
+            this.SelectionLasso.Points.Add(new Point(currentPoint.X, currentPoint.Y));
+
             this.SelectionCanvas.PointerPressed -= SelectionCanvas_PointerPressed;
             this.SelectionCanvas.PointerMoved += SelectionCanvas_PointerMoved;
             this.SelectionCanvas.PointerReleased += SelectionCanvas_PointerReleased;
@@ -69,8 +57,7 @@ namespace MyLecture.Controls
         private void SelectionCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
         {
             var currentPoint = e.GetCurrentPoint(this.SelectionCanvas).Position;
-            Debug.WriteLine(currentPoint.X + "," + currentPoint.Y);
-            this.selectionLasso.Points.Add(currentPoint);
+            this.SelectionLasso.Points.Add(currentPoint);
         }
 
         private void SelectionCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)

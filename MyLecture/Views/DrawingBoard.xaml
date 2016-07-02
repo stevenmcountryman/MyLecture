@@ -132,6 +132,7 @@
                                     Visibility="Collapsed"
                                     ChooseSlide="SlidesView_ChooseSlide"
                                     CreateNewSlide="SlidesView_CreateNewSlide" 
-                                    SaveButtonTapped="SlidesView_SaveButtonTapped"/>
+                                    SaveButtonTapped="SlidesView_SaveButtonTapped"
+                                    ExportButtonPressed="SlidesView_ExportButtonPressed"/>
     </RelativePanel>
 </Page>

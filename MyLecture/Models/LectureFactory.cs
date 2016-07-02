@@ -1,11 +1,7 @@
 ﻿using MyLecture.IO;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.AccessCache;
@@ -135,7 +131,7 @@ namespace MyLecture.Models
             savePicker.SuggestedFileName = "UntitledLecture";
 
             StorageFile file = await savePicker.PickSaveFileAsync();
-            StorageApplicationPermissions.FutureAccessList.AddOrReplace("PickedFileToken", file);
+            StorageApplicationPermissions.FutureAccessList.AddOrReplace("SaveFileToken", file);
             await this.ReaderWriter.SaveAllSlides(this.Slides, file);
         }
 
@@ -146,6 +142,7 @@ namespace MyLecture.Models
             openPicker.FileTypeFilter.Add(".smc");
 
             StorageFile file = await openPicker.PickSingleFileAsync();
+            StorageApplicationPermissions.FutureAccessList.AddOrReplace("OpenFileToken", file);
             this.Slides = await this.ReaderWriter.OpenAllSlides(file);
         }
 
@@ -154,9 +151,16 @@ namespace MyLecture.Models
             this.Slides = await this.ReaderWriter.OpenAllSlides(file);
         }
 
-        public void ExportToPDF()
+        public async void ExportToImages()
         {
+            var savePicker = new FolderPicker();
+            savePicker.FileTypeFilter.Add("*");
+            savePicker.ViewMode = PickerViewMode.List;
+            savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
 
+            StorageFolder folder = await savePicker.PickSingleFolderAsync();
+            StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImagesFolderToken", folder);
+            await this.ReaderWriter.SaveAllSlidesToImages(this.Slides, folder);
         }
 
         private void createNewSlideCollection()

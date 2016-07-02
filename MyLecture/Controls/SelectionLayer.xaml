@@ -11,5 +11,10 @@
 
     <Canvas x:Name="SelectionCanvas"
             PointerPressed="SelectionCanvas_PointerPressed"
-            Background="Transparent"/>
+            Background="Transparent">
+        <Polygon x:Name="SelectionLasso" 
+                 Fill="Transparent"
+                 Stroke="Gray"
+                 StrokeThickness="2"/>
+    </Canvas>
 </UserControl>

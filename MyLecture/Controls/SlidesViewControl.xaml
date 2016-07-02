@@ -39,7 +39,7 @@
                 <TranslateTransform x:Name="SlidesViewTranslate" X="-400" />
             </RelativePanel.RenderTransform>
             <TextBlock x:Name="TitleText"
-                        Text="Slides"
+                       Text="Slides"
                        Margin="24,24,24,0"
                        FontSize="24"
                        Foreground="White"
@@ -56,8 +56,17 @@
                       Tapped="SlidesGrid_Tapped"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                   RelativePanel.Below="TitleText"
-                  RelativePanel.AlignBottomWithPanel="True">
+                  RelativePanel.Above="ExportButton">
             </GridView>
+            <TextBlock x:Name="ExportButton"
+                       Text="save as images"
+                       Margin="24,24,24,24"
+                       FontSize="24"
+                       Foreground="White"
+                       FontWeight="Bold"
+                       RelativePanel.AlignBottomWithPanel="True"
+                       RelativePanel.AlignHorizontalCenterWithPanel="True"
+                       Tapped="ExportButton_Tapped"/>
         </RelativePanel>        
     </RelativePanel>
 </UserControl>

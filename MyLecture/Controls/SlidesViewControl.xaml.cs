@@ -1,4 +1,5 @@
-﻿using MyLecture.IO;
+﻿using Microsoft.Graphics.Canvas;
+using MyLecture.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,9 @@ namespace MyLecture.Controls
 
         public delegate void SaveButtonTapHandler(object sender, EventArgs e);
         public event SaveButtonTapHandler SaveButtonTapped;
+
+        public delegate void ExportHandler(object sender, EventArgs e);
+        public event ExportHandler ExportButtonPressed;
 
         public int SlideIndex
         {
@@ -158,6 +162,11 @@ namespace MyLecture.Controls
         private void SaveButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
             this.SaveButtonTapped(sender, new EventArgs());
+        }
+
+        private void ExportButton_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            this.ExportButtonPressed(this, new EventArgs());
         }
     }
 }

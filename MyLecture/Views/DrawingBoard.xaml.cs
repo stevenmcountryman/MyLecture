@@ -1,4 +1,5 @@
-﻿using MyLecture.Controls;
+﻿using Microsoft.Graphics.Canvas;
+using MyLecture.Controls;
 using MyLecture.IO;
 using MyLecture.Models;
 using System;
@@ -391,6 +392,10 @@ namespace MyLecture.Views
         private void SlidesView_SaveButtonTapped(object sender, EventArgs e)
         {
             this.lectureFactory.SaveLectureAs();
+        }
+        private void SlidesView_ExportButtonPressed(object sender, EventArgs e)
+        {
+            this.lectureFactory.ExportToImages();
         }
         #endregion
     }
