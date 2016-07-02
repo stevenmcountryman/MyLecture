@@ -1,9 +1,11 @@
 ﻿using MyLecture.Models;
 using MyLecture.Views;
 using Windows.Storage;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using System;
 
 namespace MyLecture
 {
@@ -42,8 +44,22 @@ namespace MyLecture
         private async void OpenLectureButton_Click(object sender, RoutedEventArgs e)
         {
             LectureFactory lectureFactory = new LectureFactory();
-            await lectureFactory.OpenExistingLecture();
-            this.Frame.Navigate(typeof(DrawingBoard), lectureFactory);
+            if (await lectureFactory.OpenExistingLecture())
+            {
+                this.Frame.Navigate(typeof(DrawingBoard), lectureFactory);
+            }
+            else
+            {
+                this.showDialog("Failure", "Error opening lecture file. Try again");
+            }
+        }
+        private async void showDialog(string title, string message)
+        {
+            MessageDialog dialog = new MessageDialog(message);
+            dialog.Title = title;
+            dialog.Commands.Add(new UICommand("ok"));
+            dialog.DefaultCommandIndex = 0;
+            await dialog.ShowAsync();
         }
     }
 }

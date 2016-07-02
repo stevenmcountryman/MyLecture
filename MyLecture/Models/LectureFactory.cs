@@ -123,27 +123,43 @@ namespace MyLecture.Models
 
         }
 
-        public async void SaveLectureAs()
+        public async Task<bool> SaveLectureAs()
         {
-            var savePicker = new FileSavePicker();
-            savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            savePicker.FileTypeChoices.Add("InkLecture", new List<string>() { ".smc" });
-            savePicker.SuggestedFileName = "UntitledLecture";
+            try
+            {
+                var savePicker = new FileSavePicker();
+                savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                savePicker.FileTypeChoices.Add("InkLecture", new List<string>() { ".smc" });
+                savePicker.SuggestedFileName = "UntitledLecture";
 
-            StorageFile file = await savePicker.PickSaveFileAsync();
-            StorageApplicationPermissions.FutureAccessList.AddOrReplace("SaveFileToken", file);
-            await this.ReaderWriter.SaveAllSlides(this.Slides, file);
+                StorageFile file = await savePicker.PickSaveFileAsync();
+                StorageApplicationPermissions.FutureAccessList.AddOrReplace("SaveFileToken", file);
+                await this.ReaderWriter.SaveAllSlides(this.Slides, file);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        public async Task OpenExistingLecture()
+        public async Task<bool> OpenExistingLecture()
         {
-            var openPicker = new FileOpenPicker();
-            openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            openPicker.FileTypeFilter.Add(".smc");
+            try
+            {
+                var openPicker = new FileOpenPicker();
+                openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                openPicker.FileTypeFilter.Add(".smc");
 
-            StorageFile file = await openPicker.PickSingleFileAsync();
-            StorageApplicationPermissions.FutureAccessList.AddOrReplace("OpenFileToken", file);
-            this.Slides = await this.ReaderWriter.OpenAllSlides(file);
+                StorageFile file = await openPicker.PickSingleFileAsync();
+                StorageApplicationPermissions.FutureAccessList.AddOrReplace("OpenFileToken", file);
+                this.Slides = await this.ReaderWriter.OpenAllSlides(file);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task OpenExistingLecture(StorageFile file)
@@ -151,16 +167,24 @@ namespace MyLecture.Models
             this.Slides = await this.ReaderWriter.OpenAllSlides(file);
         }
 
-        public async void ExportToImages()
+        public async Task<bool> ExportToImages()
         {
-            var savePicker = new FolderPicker();
-            savePicker.FileTypeFilter.Add("*");
-            savePicker.ViewMode = PickerViewMode.List;
-            savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            try
+            {
+                var savePicker = new FolderPicker();
+                savePicker.FileTypeFilter.Add("*");
+                savePicker.ViewMode = PickerViewMode.List;
+                savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
 
-            StorageFolder folder = await savePicker.PickSingleFolderAsync();
-            StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImagesFolderToken", folder);
-            await this.ReaderWriter.SaveAllSlidesToImages(this.Slides, folder);
+                StorageFolder folder = await savePicker.PickSingleFolderAsync();
+                StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImagesFolderToken", folder);
+                await this.ReaderWriter.SaveAllSlidesToImages(this.Slides, folder);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void createNewSlideCollection()

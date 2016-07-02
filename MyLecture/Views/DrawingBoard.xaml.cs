@@ -1,16 +1,13 @@
-﻿using Microsoft.Graphics.Canvas;
-using MyLecture.Controls;
-using MyLecture.IO;
+﻿using MyLecture.Controls;
 using MyLecture.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Windows.Foundation;
-using Windows.Storage;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Input.Inking;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -389,13 +386,35 @@ namespace MyLecture.Views
             this.SlidesView.SlidesClosed -= SlidesView_SlidesClosed;
             this.SlidesView.Visibility = Visibility.Collapsed;
         }
-        private void SlidesView_SaveButtonTapped(object sender, EventArgs e)
+        private async void SlidesView_SaveButtonTapped(object sender, EventArgs e)
         {
-            this.lectureFactory.SaveLectureAs();
+            if (await this.lectureFactory.SaveLectureAs())
+            {
+                this.showDialog("Success", "Lecture saved successfully!");
+            }
+            else
+            {
+                this.showDialog("Failure", "Error saving lecture. Try again.");
+            }
         }
-        private void SlidesView_ExportButtonPressed(object sender, EventArgs e)
+        private async void SlidesView_ExportButtonPressed(object sender, EventArgs e)
         {
-            this.lectureFactory.ExportToImages();
+            if (await this.lectureFactory.ExportToImages())
+            {
+                this.showDialog("Success", "Images saved successfully!");
+            }
+            else
+            {
+                this.showDialog("Failure", "Error saving images. Try again.");
+            }
+        }
+        private async void showDialog(string title, string message)
+        {
+            MessageDialog dialog = new MessageDialog(message);
+            dialog.Title = title;
+            dialog.Commands.Add(new UICommand("ok"));
+            dialog.DefaultCommandIndex = 0;
+            await dialog.ShowAsync();
         }
         #endregion
     }
