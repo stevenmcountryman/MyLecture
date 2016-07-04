@@ -16,7 +16,10 @@
                     <QuadraticEase EasingMode="EaseIn" />
                 </DoubleAnimation.EasingFunction>
             </DoubleAnimation>
-            <ColorAnimation x:Name="BackgroundOpacity" Duration="0:0:0.2" Storyboard.TargetName="BackgroundColor" Storyboard.TargetProperty="Color" />
+            <DoubleAnimation x:Name="BackgroundOpacity" Duration="0:0:0.2" Storyboard.TargetName="BackgroundShade" Storyboard.TargetProperty="Opacity" />
+        </Storyboard>
+        <Storyboard x:Name="DeleteIconAppear">
+            <DoubleAnimation x:Name="DeleteIconVisibility" Duration="0:0:0.2" Storyboard.TargetName="DeleteIcon" Storyboard.TargetProperty="Opacity" />
         </Storyboard>
     </UserControl.Resources>
     
@@ -25,11 +28,23 @@
                    RelativePanel.AlignLeftWithPanel="True"
                    RelativePanel.AlignTopWithPanel="True"
                    RelativePanel.AlignBottomWithPanel="True"
-                   RelativePanel.AlignRightWithPanel="True" Tapped="BackgroundShade_Tapped">
-            <Rectangle.Fill>
-                <SolidColorBrush x:Name="BackgroundColor" Color="Transparent"/>
-            </Rectangle.Fill>
+                   RelativePanel.AlignRightWithPanel="True" 
+                   Tapped="BackgroundShade_Tapped"
+                   AllowDrop="True"
+                   DragEnter="BackgroundShade_DragEnter"
+                   DragLeave="BackgroundShade_DragLeave"
+                   Drop="BackgroundShade_Drop"
+                   Opacity="0" Fill="Black">
         </Rectangle>
+        <Viewbox x:Name="DeleteIcon"
+                 Height="75"
+                 Width="75"
+                 RelativePanel.AlignHorizontalCenterWithPanel="True"
+                 RelativePanel.AlignVerticalCenterWithPanel="True"
+                 Opacity="0">
+            <SymbolIcon Symbol="Delete"
+                        Foreground="Red"/>
+        </Viewbox>
         <RelativePanel RelativePanel.AlignLeftWithPanel="True"
                        RelativePanel.AlignTopWithPanel="True"
                        RelativePanel.AlignBottomWithPanel="True"
@@ -52,12 +67,17 @@
                         RelativePanel.AlignRightWithPanel="True"
                         Tapped="SaveButton_Tapped"/>
             <GridView x:Name="SlidesGrid" 
-                       Margin="24,12,24,12"
+                      Margin="24,12,24,12"
                       Tapped="SlidesGrid_Tapped"
+                      RightTapped="SlidesGrid_RightTapped"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
-                  RelativePanel.Below="TitleText"
-                  RelativePanel.Above="ExportButton">
-            </GridView>
+                      RelativePanel.Below="TitleText"
+                      RelativePanel.Above="ExportButton"
+                      ReorderMode="Enabled"
+                      CanDragItems="True"
+                      AllowDrop="True"
+                      DragItemsStarting="SlidesGrid_DragItemsStarting">
+            </GridView>            
             <TextBlock x:Name="ExportButton"
                        Text="save as images"
                        Margin="24,24,24,24"

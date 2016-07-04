@@ -15,6 +15,7 @@
         <Polygon x:Name="SelectionLasso" 
                  Fill="Transparent"
                  Stroke="Gray"
-                 StrokeThickness="2"/>
+                 StrokeThickness="2"
+                 StrokeDashArray="2"/>
     </Canvas>
 </UserControl>

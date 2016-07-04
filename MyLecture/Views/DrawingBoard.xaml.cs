@@ -408,6 +408,17 @@ namespace MyLecture.Views
                 this.showDialog("Failure", "Error saving images. Try again.");
             }
         }
+        private void SlidesView_SlideDeleted(object sender, EventArgs e)
+        {
+            this.lectureFactory.DeleteSlide(this.SlidesView.SlideIndexToDelete);
+            if (this.SlidesView.SlideIndexToDelete == this.SlidesView.SlideIndex)
+            {
+                this.clearCanvas();
+                var chosenSlide = this.lectureFactory.GetSlideAt(this.SlidesView.SlideIndex);
+                this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
+                this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+            }
+        }
         private async void showDialog(string title, string message)
         {
             MessageDialog dialog = new MessageDialog(message);
@@ -417,5 +428,6 @@ namespace MyLecture.Views
             await dialog.ShowAsync();
         }
         #endregion
+
     }
 }

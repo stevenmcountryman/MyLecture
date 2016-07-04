@@ -6,6 +6,7 @@ using System.Linq;
 using Windows.Storage;
 using Windows.UI;
 using Windows.UI.Input.Inking;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -18,8 +19,7 @@ namespace MyLecture.Controls
     {
         readonly static int HIDDEN = -400;
         readonly static int VISIBLE = 0;
-        readonly static Color TRANSPARENT = Color.FromArgb(0, 0, 0, 0);
-        readonly static Color TRANSLUCENT = Color.FromArgb(100, 0, 0, 0);
+
         public delegate void SelectionMadeHandler(object sender, EventArgs e);
         public event SelectionMadeHandler ChooseSlide;
 
@@ -35,7 +35,18 @@ namespace MyLecture.Controls
         public delegate void ExportHandler(object sender, EventArgs e);
         public event ExportHandler ExportButtonPressed;
 
+        public delegate void SlideDeleteHandler(object sender, EventArgs e);
+        public event SlideDeleteHandler SlideDeleted;
+
+        public delegate void SlideMovedHandler(object sender, EventArgs e);
+        public event SlideMovedHandler SlideMoved;
+
         public int SlideIndex
+        {
+            get;
+            private set;
+        }
+        public int SlideIndexToDelete
         {
             get;
             private set;
@@ -50,19 +61,15 @@ namespace MyLecture.Controls
 
         public void OpenSlidesView()
         {
-            this.SlidesViewAnimation.From = HIDDEN;
             this.SlidesViewAnimation.To = VISIBLE;
-            this.BackgroundOpacity.From = TRANSPARENT;
-            this.BackgroundOpacity.To = TRANSLUCENT;
+            this.BackgroundOpacity.To = 0.75;
             this.SlidesViewSlide.Begin();
         }
 
         public void CloseSlidesView()
         {
-            this.SlidesViewAnimation.From = VISIBLE;
             this.SlidesViewAnimation.To = HIDDEN;
-            this.BackgroundOpacity.From = TRANSLUCENT;
-            this.BackgroundOpacity.To = TRANSPARENT;
+            this.BackgroundOpacity.To = 0;
             this.SlidesViewSlide.Completed += SlidesViewSlide_Completed;
             this.SlidesViewSlide.Begin();
         }
@@ -139,7 +146,6 @@ namespace MyLecture.Controls
             inkCanvas.InkPresenter.StrokeContainer = inkStrokes;
             panel.Children.Add(inkCanvas);            
         }
-
         private void SlidesGrid_Tapped(object sender, TappedRoutedEventArgs e)
         {
             this.SlideIndex = this.SlidesGrid.Items.IndexOf(this.SlidesGrid.SelectedItem);
@@ -152,6 +158,27 @@ namespace MyLecture.Controls
             {
                 this.ChooseSlide(sender, new EventArgs());
             }
+        }
+        private async void SlidesGrid_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            this.SlideIndexToDelete = this.SlidesGrid.Items.IndexOf(this.SlidesGrid.SelectedItem);
+            if (this.SlideIndexToDelete != this.SlidesGrid.Items.Count() - 1)
+            {
+
+                MessageDialog deleteDialog = new MessageDialog("Delete slide?");
+                deleteDialog.Commands.Add(new UICommand("Delete", DeleteSlideAction()));
+                deleteDialog.Commands.Add(new UICommand("Cancel", DeleteSlideAction()));
+                deleteDialog.DefaultCommandIndex = 0;
+                deleteDialog.CancelCommandIndex = 1;
+                await deleteDialog.ShowAsync();
+            }
+        }
+
+        private UICommandInvokedHandler DeleteSlideAction()
+        {
+            this.SlidesGrid.Items.RemoveAt(this.SlideIndexToDelete);
+            this.SlideDeleted(this, new EventArgs());
+            return null;
         }
 
         private void BackgroundShade_Tapped(object sender, TappedRoutedEventArgs e)
@@ -167,6 +194,29 @@ namespace MyLecture.Controls
         private void ExportButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
             this.ExportButtonPressed(this, new EventArgs());
+        }
+
+        private void SlidesGrid_DragItemsStarting(object sender, DragItemsStartingEventArgs e)
+        {
+            var draggedItem = e.Items[0];
+            var listIndex = this.SlidesGrid.Items.IndexOf(draggedItem);
+        }
+
+        private void BackgroundShade_DragEnter(object sender, DragEventArgs e)
+        {
+            this.DeleteIconVisibility.To = 1.0;
+            this.DeleteIconAppear.Begin();
+        }
+
+        private void BackgroundShade_Drop(object sender, DragEventArgs e)
+        {
+
+        }
+
+        private void BackgroundShade_DragLeave(object sender, DragEventArgs e)
+        {
+            this.DeleteIconVisibility.To = 0;
+            this.DeleteIconAppear.Begin();
         }
     }
 }
