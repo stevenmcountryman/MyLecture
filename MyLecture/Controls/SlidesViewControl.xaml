@@ -73,7 +73,7 @@
                        Foreground="LightGray"
                        Background="Transparent"
                        BorderBrush="Transparent"
-                       Padding="0"
+                       Padding="8,0,8,0"
                        FontSize="26"
                        RelativePanel.AlignTopWithPanel="True"
                        RelativePanel.RightOf="SlideViewButton"
@@ -96,8 +96,6 @@
                         Tapped="SaveButton_Tapped"/>
             <GridView x:Name="SlidesGrid" 
                       Margin="24,12,24,12"
-                      Tapped="SlidesGrid_Tapped"
-                      RightTapped="SlidesGrid_RightTapped"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                       RelativePanel.Below="SlidesText"
                       RelativePanel.Above="ExportButton"

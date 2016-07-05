@@ -414,9 +414,16 @@ namespace MyLecture.Views
             if (this.SlidesView.SlideIndexToDelete == this.SlidesView.SlideIndex)
             {
                 this.clearCanvas();
-                var chosenSlide = this.lectureFactory.GetSlideAt(this.SlidesView.SlideIndex);
-                this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
-                this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+                if (this.lectureFactory.GetAllSlides().Count > 0)
+                {
+                    var chosenSlide = this.lectureFactory.GetSlideAt(0);
+                    this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
+                    this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+                }
+                else
+                {
+                    this.SlidesView.AddNewBlankSlide();
+                }
             }
         }
         private async void showDialog(string title, string message)

@@ -63,6 +63,7 @@ namespace MyLecture.Controls
             this.InitializeComponent();
             this.createAddSlideControl();
             this.createNewBlankSlide();
+            this.SlideIndex = 0;
         }
 
         public void OpenSlidesView()
@@ -113,7 +114,54 @@ namespace MyLecture.Controls
             RelativePanel panel = this.createNewSlidePanel(iconBox);
             Viewbox viewbox = new Viewbox();
             viewbox.Child = panel;
+            viewbox.Tapped += AddSlideButton_Tapped;
             this.SlidesGrid.Items.Add(viewbox);
+        }
+
+        private void createNewBlankSlide()
+        {
+            RelativePanel panel = this.createNewSlidePanel(null);
+            Viewbox viewbox = new Viewbox();
+            viewbox.Child = panel;
+            viewbox.Tapped += Slide_Tapped;
+            viewbox.RightTapped += Slide_RightTapped;
+            this.SlidesGrid.Items.Insert((this.SlidesGrid.Items.Count() - 1), viewbox);
+        }
+        public void AddNewBlankSlide()
+        {
+            this.SlideIndex = this.SlidesGrid.Items.Count - 1;
+            this.createNewBlankSlide();
+            this.CreateNewSlide(this, new EventArgs());
+        }
+        private void AddSlideButton_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            this.AddNewBlankSlide();
+        }
+        private void Slide_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            this.SlideIndex = this.SlidesGrid.Items.IndexOf(sender as Viewbox);
+            this.ChooseSlide(sender, new EventArgs());
+        }
+
+        private void Slide_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            this.SlideIndexToDelete = this.SlidesGrid.Items.IndexOf(sender as Viewbox);
+            MenuFlyout popUp = new MenuFlyout();
+            MenuFlyoutItem deleteItem = new MenuFlyoutItem();
+            deleteItem.Text = "Delete";
+            deleteItem.Click += DeleteItem_Click;
+            popUp.Items.Add(deleteItem);
+            popUp.ShowAt(sender as Viewbox);
+        }
+
+        private void DeleteItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.SlidesGrid.Items.RemoveAt(this.SlideIndexToDelete);
+            if (this.SlideIndexToDelete == this.SlideIndex)
+            {
+                this.SlideIndex = 0;
+            }
+            this.SlideDeleted(this, new EventArgs());
         }
 
         private RelativePanel createNewSlidePanel(UIElement element)
@@ -131,14 +179,6 @@ namespace MyLecture.Controls
             return panel;
         }
 
-        private void createNewBlankSlide()
-        {
-            RelativePanel panel = this.createNewSlidePanel(null);
-            Viewbox viewbox = new Viewbox();
-            viewbox.Child = panel;
-            this.SlidesGrid.Items.Insert((this.SlidesGrid.Items.Count() - 1), viewbox);
-        }
-
         public void UpdateSlide(InkStrokeContainer inkStrokes, Brush backgroundColor)
         {
             var viewbox = this.SlidesGrid.Items[this.SlideIndex] as Viewbox;
@@ -152,40 +192,6 @@ namespace MyLecture.Controls
             RelativePanel.SetAlignRightWithPanel(inkCanvas, true);
             inkCanvas.InkPresenter.StrokeContainer = inkStrokes;
             panel.Children.Add(inkCanvas);            
-        }
-        private void SlidesGrid_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-            this.SlideIndex = this.SlidesGrid.Items.IndexOf(this.SlidesGrid.SelectedItem);
-            if (this.SlideIndex == this.SlidesGrid.Items.Count() - 1)
-            {
-                this.createNewBlankSlide();
-                this.CreateNewSlide(sender, new EventArgs());
-            }
-            else
-            {
-                this.ChooseSlide(sender, new EventArgs());
-            }
-        }
-        private async void SlidesGrid_RightTapped(object sender, RightTappedRoutedEventArgs e)
-        {
-            this.SlideIndexToDelete = this.SlidesGrid.Items.IndexOf(this.SlidesGrid.SelectedItem);
-            if (this.SlideIndexToDelete != this.SlidesGrid.Items.Count() - 1)
-            {
-
-                MessageDialog deleteDialog = new MessageDialog("Delete slide?");
-                deleteDialog.Commands.Add(new UICommand("Delete", DeleteSlideAction()));
-                deleteDialog.Commands.Add(new UICommand("Cancel", DeleteSlideAction()));
-                deleteDialog.DefaultCommandIndex = 0;
-                deleteDialog.CancelCommandIndex = 1;
-                await deleteDialog.ShowAsync();
-            }
-        }
-
-        private UICommandInvokedHandler DeleteSlideAction()
-        {
-            this.SlidesGrid.Items.RemoveAt(this.SlideIndexToDelete);
-            this.SlideDeleted(this, new EventArgs());
-            return null;
         }
 
         private void BackgroundShade_Tapped(object sender, TappedRoutedEventArgs e)
