@@ -47,7 +47,7 @@ namespace MyLecture.Views
             if (e.Parameter != null)
             {
                 this.lectureFactory = e.Parameter as LectureFactory;
-                this.SlidesView.ShowLoadedSlides(this.lectureFactory.GetAllSlides());
+                this.SlidesView.ShowLoadedSlides(this.lectureFactory.GetAllSlides(), this.lectureFactory.LectureName);
             }
             else
             {
@@ -388,7 +388,7 @@ namespace MyLecture.Views
         }
         private async void SlidesView_SaveButtonTapped(object sender, EventArgs e)
         {
-            if (await this.lectureFactory.SaveLectureAs())
+            if (await this.lectureFactory.SaveLectureAs(this.SlidesView.GetTitle()))
             {
                 this.showDialog("Success", "Lecture saved successfully!");
             }
@@ -428,6 +428,5 @@ namespace MyLecture.Views
             await dialog.ShowAsync();
         }
         #endregion
-
     }
 }

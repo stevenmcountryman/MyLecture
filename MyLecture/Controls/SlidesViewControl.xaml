@@ -19,7 +19,11 @@
             <DoubleAnimation x:Name="BackgroundOpacity" Duration="0:0:0.2" Storyboard.TargetName="BackgroundShade" Storyboard.TargetProperty="Opacity" />
         </Storyboard>
         <Storyboard x:Name="DeleteIconAppear">
-            <DoubleAnimation x:Name="DeleteIconVisibility" Duration="0:0:0.2" Storyboard.TargetName="DeleteIcon" Storyboard.TargetProperty="Opacity" />
+            <DoubleAnimation x:Name="DeleteIconVisibility" 
+                             Duration="0:0:0.8" 
+                             Storyboard.TargetName="DeleteIcon" 
+                             Storyboard.TargetProperty="Opacity" 
+                             AutoReverse="True"/>
         </Storyboard>
     </UserControl.Resources>
     
@@ -53,17 +57,41 @@
             <RelativePanel.RenderTransform>
                 <TranslateTransform x:Name="SlidesViewTranslate" X="-400" />
             </RelativePanel.RenderTransform>
-            <TextBlock x:Name="TitleText"
+            <TextBlock x:Name="SlideViewButton"
+                       FontFamily="Segoe MDL2 Assets"
+                       Text="&#xE700;"
+                       FontSize="30"
+                       Margin="12"
+                       Padding="0"
+                       Foreground="White"
+                       RelativePanel.AlignTopWithPanel="True"
+                       RelativePanel.AlignLeftWithPanel="True"
+                       Tapped="SlideViewButton_Tapped"/>
+            <TextBox x:Name="TitleText"
+                       Text="UntitledLecture"
+                       Margin="8,8,24,8"
+                       Foreground="LightGray"
+                       Background="Transparent"
+                       BorderBrush="Transparent"
+                       Padding="0"
+                       FontSize="26"
+                       RelativePanel.AlignTopWithPanel="True"
+                       RelativePanel.RightOf="SlideViewButton"
+                       RelativePanel.AlignRightWithPanel="True"
+                       RelativePanel.AlignBottomWith="SlideViewButton"
+                       TextAlignment="Left"/>
+            <TextBlock x:Name="SlidesText"
                        Text="Slides"
-                       Margin="24,24,24,0"
+                       Margin="24,12,24,0"
                        FontSize="24"
                        Foreground="White"
-                       FontWeight="Bold"/>
+                       FontWeight="Bold"
+                       RelativePanel.Below="SlideViewButton"/>
             <SymbolIcon x:Name="SaveButton"
                         Symbol="Save"
                         Margin="24,24,24,0"
                         Foreground="White"
-                        RelativePanel.AlignBottomWith="TitleText"
+                        RelativePanel.AlignBottomWith="SlidesText"
                         RelativePanel.AlignRightWithPanel="True"
                         Tapped="SaveButton_Tapped"/>
             <GridView x:Name="SlidesGrid" 
@@ -71,7 +99,7 @@
                       Tapped="SlidesGrid_Tapped"
                       RightTapped="SlidesGrid_RightTapped"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      RelativePanel.Below="TitleText"
+                      RelativePanel.Below="SlidesText"
                       RelativePanel.Above="ExportButton"
                       ReorderMode="Enabled"
                       CanDragItems="True"

@@ -36,23 +36,12 @@ namespace MyLecture.IO
             private set;
         }
 
-        private string FolderName;
-
         /// <summary>
         /// Creates a new IOReaderWriter object with the given folder name
         /// </summary>
         public IOReaderWriter()
         {
             this.CreateFolderHierarchy();
-        }
-
-        /// <summary>
-        /// Creates a new IOReaderWriter object with the given folder name
-        /// </summary>
-        /// <param name="folderName">The name of the folder associated with the IOReaderWriter object</param>
-        public IOReaderWriter(string folderName)
-        {
-            this.FolderName = folderName;
         }
         
         public async Task SaveAllSlidesToImages(List<InkStrokeContainer> allSlides, StorageFolder destination)
@@ -92,7 +81,7 @@ namespace MyLecture.IO
                     using (FileStream stream = new FileStream(destination.Path, FileMode.Open))
                     {
                         using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Update))
-                        {
+                        {                            
                             archive.CreateEntryFromFile(file.Path, fileName);
                         }
                     }
@@ -102,6 +91,7 @@ namespace MyLecture.IO
         }
         public async Task<List<InkStrokeContainer>> OpenAllSlides(StorageFile file)
         {
+            await this.CreateFolderHierarchy();
             List<InkStrokeContainer> allSlides = new List<InkStrokeContainer>();
             this.SaveFolder = await this.LectureFolder.CreateFolderAsync(SAVEFOLDER, CreationCollisionOption.ReplaceExisting);
             int slideIndex = 0;
@@ -162,7 +152,7 @@ namespace MyLecture.IO
             return inkStrokes;
         }
 
-        private async void CreateFolderHierarchy()
+        private async Task CreateFolderHierarchy()
         {
             this.LectureFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync(LECTUREFOLDER, CreationCollisionOption.ReplaceExisting);
             this.TempFolder = await this.LectureFolder.CreateFolderAsync(TEMPFOLDER, CreationCollisionOption.ReplaceExisting);

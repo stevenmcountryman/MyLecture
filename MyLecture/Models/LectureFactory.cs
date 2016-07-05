@@ -16,6 +16,11 @@ namespace MyLecture.Models
         private List<InkStrokeContainer> Slides;
         private List<InkStrokeContainer> TempFiles;
         private int tempFileIndex;
+        public string LectureName
+        {
+            get;
+            private set;
+        }
 
         public LectureFactory()
         {
@@ -128,7 +133,7 @@ namespace MyLecture.Models
 
         }
 
-        public async Task<bool> SaveLectureAs()
+        public async Task<bool> SaveLectureAs(string titleText)
         {
             try
             {
@@ -157,6 +162,7 @@ namespace MyLecture.Models
                 openPicker.FileTypeFilter.Add(".smc");
 
                 StorageFile file = await openPicker.PickSingleFileAsync();
+                this.LectureName = file.Name.Replace(".smc", "");
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace("OpenFileToken", file);
                 this.Slides = await this.ReaderWriter.OpenAllSlides(file);
                 return true;
@@ -169,6 +175,7 @@ namespace MyLecture.Models
 
         public async Task OpenExistingLecture(StorageFile file)
         {
+            this.LectureName = file.Name.Replace(".smc", "");
             this.Slides = await this.ReaderWriter.OpenAllSlides(file);
         }
 

@@ -3,6 +3,7 @@ using MyLecture.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.UI;
 using Windows.UI.Input.Inking;
@@ -52,6 +53,11 @@ namespace MyLecture.Controls
             private set;
         }
 
+        public string GetTitle()
+        {
+            return this.TitleText.Text;
+        }
+
         public SlidesViewControl()
         {
             this.InitializeComponent();
@@ -74,7 +80,7 @@ namespace MyLecture.Controls
             this.SlidesViewSlide.Begin();
         }
 
-        public void ShowLoadedSlides(List<InkStrokeContainer> slides)
+        public void ShowLoadedSlides(List<InkStrokeContainer> slides, string lectureName)
         {
             this.UpdateSlide(slides[0], new SolidColorBrush(Colors.White));
             for (int i = 1; i < slides.Count(); i++)
@@ -84,6 +90,7 @@ namespace MyLecture.Controls
                 this.UpdateSlide(slides[i], new SolidColorBrush(Colors.White));
             }
             this.SlideIndex = 0;
+            this.TitleText.Text = lectureName;
         }
 
         private void SlidesViewSlide_Completed(object sender, object e)
@@ -200,12 +207,30 @@ namespace MyLecture.Controls
         {
             var draggedItem = e.Items[0];
             var listIndex = this.SlidesGrid.Items.IndexOf(draggedItem);
+            this.DeleteIconVisibility.From = 0.0;
+            this.DeleteIconVisibility.To = 1.0;
+            this.DeleteIconAppear.RepeatBehavior = RepeatBehavior.Forever;
+            this.DeleteIconAppear.Begin();
         }
 
         private void BackgroundShade_DragEnter(object sender, DragEventArgs e)
         {
+            this.DeleteIconVisibility.From = 0.1;
             this.DeleteIconVisibility.To = 1.0;
+            this.DeleteIconAppear.RepeatBehavior = RepeatBehavior.Forever;
             this.DeleteIconAppear.Begin();
+
+            if (e.DataView.GetType() == typeof(GridViewItem))
+            {
+                e.AcceptedOperation = DataPackageOperation.Move;
+            }
+            else
+            {
+                e.AcceptedOperation = DataPackageOperation.None;
+            }
+
+            // Add this
+            e.Handled = true;
         }
 
         private void BackgroundShade_Drop(object sender, DragEventArgs e)
@@ -215,8 +240,12 @@ namespace MyLecture.Controls
 
         private void BackgroundShade_DragLeave(object sender, DragEventArgs e)
         {
-            this.DeleteIconVisibility.To = 0;
-            this.DeleteIconAppear.Begin();
+
+        }
+
+        private void SlideViewButton_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            this.CloseSlidesView();
         }
     }
 }
