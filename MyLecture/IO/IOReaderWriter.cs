@@ -72,13 +72,14 @@ namespace MyLecture.IO
         {
             this.SaveFolder = await this.LectureFolder.CreateFolderAsync(SAVEFOLDER, CreationCollisionOption.ReplaceExisting);
             int slideIndex = 0;
+            StorageFile tempZip = await this.createFile(this.SaveFolder, "TempZip");
             foreach (InkStrokeContainer slide in allSlides)
             {
                 var fileName = string.Format(SLIDESAVEFILE, slideIndex);
                 var file = await this.saveInkStrokesToFile(slide, fileName, this.SaveFolder);
                 await Task.Run(() =>
                 {
-                    using (FileStream stream = new FileStream(destination.Path, FileMode.Open))
+                    using (FileStream stream = new FileStream(tempZip.Path, FileMode.Open))
                     {
                         using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Update))
                         {                            
@@ -88,6 +89,7 @@ namespace MyLecture.IO
                 });
                 slideIndex++;
             }
+            await tempZip.CopyAndReplaceAsync(destination);
         }
         public async Task<List<InkStrokeContainer>> OpenAllSlides(StorageFile file)
         {
