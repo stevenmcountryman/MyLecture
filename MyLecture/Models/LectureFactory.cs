@@ -140,7 +140,7 @@ namespace MyLecture.Models
                 var savePicker = new FileSavePicker();
                 savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
                 savePicker.FileTypeChoices.Add("InkLecture", new List<string>() { ".smc" });
-                savePicker.SuggestedFileName = "UntitledLecture";
+                savePicker.SuggestedFileName = titleText;
 
                 StorageFile file = await savePicker.PickSaveFileAsync();
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace("SaveFileToken", file);
