@@ -411,19 +411,16 @@ namespace MyLecture.Views
         private void SlidesView_SlideDeleted(object sender, EventArgs e)
         {
             this.lectureFactory.DeleteSlide(this.SlidesView.SlideIndexToDelete);
-            if (this.SlidesView.SlideIndexToDelete == this.SlidesView.SlideIndex)
+            this.clearCanvas();
+            if (this.lectureFactory.GetAllSlides().Count > 0)
             {
-                this.clearCanvas();
-                if (this.lectureFactory.GetAllSlides().Count > 0)
-                {
-                    var chosenSlide = this.lectureFactory.GetSlideAt(0);
-                    this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
-                    this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
-                }
-                else
-                {
-                    this.SlidesView.AddNewBlankSlide();
-                }
+                var chosenSlide = this.lectureFactory.GetSlideAt(this.SlidesView.SlideIndex);
+                this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
+                this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+            }
+            else
+            {
+                this.SlidesView.AddNewBlankSlide();
             }
         }
         private async void showDialog(string title, string message)

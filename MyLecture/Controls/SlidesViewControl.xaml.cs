@@ -157,7 +157,7 @@ namespace MyLecture.Controls
         private void DeleteItem_Click(object sender, RoutedEventArgs e)
         {
             this.SlidesGrid.Items.RemoveAt(this.SlideIndexToDelete);
-            if (this.SlideIndexToDelete == this.SlideIndex)
+            if (this.SlideIndex == this.SlideIndexToDelete)
             {
                 this.SlideIndex = 0;
             }
