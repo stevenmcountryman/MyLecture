@@ -410,11 +410,17 @@ namespace MyLecture.Views
         }
         private void SlidesView_SlideDeleted(object sender, EventArgs e)
         {
-            this.lectureFactory.DeleteSlide(this.SlidesView.SlideIndexToDelete);
+            this.lectureFactory.DeleteSlide(this.SlidesView.SlideIndexToModify);
             this.clearCanvas();
-            if (this.lectureFactory.GetAllSlides().Count > 0)
+            if (this.lectureFactory.GetAllSlides().Count > 1)
             {
                 var chosenSlide = this.lectureFactory.GetSlideAt(this.SlidesView.SlideIndex);
+                this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
+                this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+            }
+            else if (this.lectureFactory.GetAllSlides().Count == 1)
+            {
+                var chosenSlide = this.lectureFactory.GetSlideAt(0);
                 this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
                 this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
             }
@@ -422,6 +428,10 @@ namespace MyLecture.Views
             {
                 this.SlidesView.AddNewBlankSlide();
             }
+        }
+        private void SlidesView_SlideMoved(object sender, EventArgs e)
+        {
+            this.lectureFactory.MoveSlide(this.SlidesView.SlideIndexToModify, this.SlidesView.SlideIndex);
         }
         private async void showDialog(string title, string message)
         {
@@ -432,5 +442,6 @@ namespace MyLecture.Views
             await dialog.ShowAsync();
         }
         #endregion
+
     }
 }

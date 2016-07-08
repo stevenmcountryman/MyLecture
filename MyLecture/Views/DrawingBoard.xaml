@@ -134,6 +134,7 @@
                                     CreateNewSlide="SlidesView_CreateNewSlide" 
                                     SaveButtonTapped="SlidesView_SaveButtonTapped"
                                     ExportButtonPressed="SlidesView_ExportButtonPressed"
-                                    SlideDeleted="SlidesView_SlideDeleted"/>
+                                    SlideDeleted="SlidesView_SlideDeleted"
+                                    SlideMoved="SlidesView_SlideMoved"/>
     </RelativePanel>
 </Page>

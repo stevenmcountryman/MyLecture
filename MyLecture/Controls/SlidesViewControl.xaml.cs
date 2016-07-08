@@ -47,7 +47,7 @@ namespace MyLecture.Controls
             get;
             private set;
         }
-        public int SlideIndexToDelete
+        public int SlideIndexToModify
         {
             get;
             private set;
@@ -145,22 +145,55 @@ namespace MyLecture.Controls
 
         private void Slide_RightTapped(object sender, RightTappedRoutedEventArgs e)
         {
-            this.SlideIndexToDelete = this.SlidesGrid.Items.IndexOf(sender as Viewbox);
+            this.SlideIndexToModify = this.SlidesGrid.Items.IndexOf(sender as Viewbox);
             MenuFlyout popUp = new MenuFlyout();
+
+            if (this.SlideIndexToModify != 0)
+            {
+                MenuFlyoutItem moveUpItem = new MenuFlyoutItem();
+                moveUpItem.Text = "Move Up";
+                moveUpItem.Click += MoveUpItem_Click;
+                popUp.Items.Add(moveUpItem);
+            }
+
             MenuFlyoutItem deleteItem = new MenuFlyoutItem();
             deleteItem.Text = "Delete";
             deleteItem.Click += DeleteItem_Click;
             popUp.Items.Add(deleteItem);
+
+            if (this.SlideIndexToModify != this.SlidesGrid.Items.Count - 2)
+            {
+                MenuFlyoutItem moveDownItem = new MenuFlyoutItem();
+                moveDownItem.Text = "Move Down";
+                moveDownItem.Click += MoveDownItem_Click;
+                popUp.Items.Add(moveDownItem);
+            }
+
             popUp.ShowAt(sender as Viewbox);
+        }
+
+        private void MoveDownItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.SlideIndex = this.SlideIndexToModify + 1;
+            var tempSlide = this.SlidesGrid.Items[this.SlideIndexToModify];
+            this.SlidesGrid.Items.RemoveAt(this.SlideIndexToModify);
+            this.SlidesGrid.Items.Insert(this.SlideIndex, tempSlide);
+            this.SlideMoved(this, new EventArgs());
+        }
+
+        private void MoveUpItem_Click(object sender, RoutedEventArgs e)
+        {
+            this.SlideIndex = this.SlideIndexToModify - 1;
+            var tempSlide = this.SlidesGrid.Items[this.SlideIndexToModify];
+            this.SlidesGrid.Items.RemoveAt(this.SlideIndexToModify);
+            this.SlidesGrid.Items.Insert(this.SlideIndex, tempSlide);
+            this.SlideMoved(this, new EventArgs());
         }
 
         private void DeleteItem_Click(object sender, RoutedEventArgs e)
         {
-            this.SlidesGrid.Items.RemoveAt(this.SlideIndexToDelete);
-            if (this.SlideIndex == this.SlideIndexToDelete)
-            {
-                this.SlideIndex = 0;
-            }
+            this.SlidesGrid.Items.RemoveAt(this.SlideIndexToModify);
+            this.SlideIndex = 0;
             this.SlideDeleted(this, new EventArgs());
         }
 

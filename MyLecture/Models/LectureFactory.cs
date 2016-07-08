@@ -49,6 +49,13 @@ namespace MyLecture.Models
             this.Slides.RemoveAt(slideIndexToDelete);
         }
 
+        public void MoveSlide(int slideIndexToMove, int destinationIndex)
+        {
+            var tempSlide = this.Slides[slideIndexToMove];
+            this.Slides.RemoveAt(slideIndexToMove);
+            this.Slides.Insert(destinationIndex, tempSlide);
+        }
+
         public List<InkStrokeContainer> GetAllSlides()
         {
             return this.Slides;
