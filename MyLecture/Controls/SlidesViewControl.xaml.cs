@@ -6,6 +6,7 @@ using System.Linq;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage;
 using Windows.UI;
+using Windows.UI.Core;
 using Windows.UI.Input.Inking;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
@@ -224,6 +225,7 @@ namespace MyLecture.Controls
             RelativePanel.SetAlignTopWithPanel(inkCanvas, true);
             RelativePanel.SetAlignRightWithPanel(inkCanvas, true);
             inkCanvas.InkPresenter.StrokeContainer = inkStrokes;
+            inkCanvas.InkPresenter.InputDeviceTypes = CoreInputDeviceTypes.None;
             panel.Children.Add(inkCanvas);            
         }
 

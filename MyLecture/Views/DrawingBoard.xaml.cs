@@ -162,6 +162,7 @@ namespace MyLecture.Views
             {
                 this.changeUIColor(this.blackColor, this.whiteColor);
             }
+            this.saveSlide();
         }
         private void changeUIColor(SolidColorBrush brush1, SolidColorBrush brush2)
         {
