@@ -386,6 +386,14 @@ namespace MyLecture.Views
         {
             this.SlidesView.SlidesClosed -= SlidesView_SlidesClosed;
             this.SlidesView.Visibility = Visibility.Collapsed;
+            if (!this.isMainCanvasEmpty())
+            {
+                this.SelectionTool.IsEnabled = true;
+            }
+            else
+            {
+                this.SelectionTool.IsEnabled = false;
+            }
         }
         private async void SlidesView_SaveButtonTapped(object sender, EventArgs e)
         {
@@ -400,7 +408,7 @@ namespace MyLecture.Views
         }
         private async void SlidesView_ExportButtonPressed(object sender, EventArgs e)
         {
-            if (await this.lectureFactory.ExportToImages())
+            if (await this.lectureFactory.ExportToImages(this.SlidesView.GetTitle()))
             {
                 this.showDialog("Success", "Images saved successfully!");
             }
@@ -443,6 +451,5 @@ namespace MyLecture.Views
             await dialog.ShowAsync();
         }
         #endregion
-
     }
 }

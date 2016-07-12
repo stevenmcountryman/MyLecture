@@ -7,6 +7,10 @@ using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
 using Windows.UI.Input.Inking;
+using Windows.UI.ViewManagement;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
+using MyLecture.Views;
 
 namespace MyLecture.Models
 {
@@ -81,7 +85,7 @@ namespace MyLecture.Models
             }
             if (inkStrokes.GetStrokes().Count() > 0)
             {
-                var tempFile = await this.ReaderWriter.SaveSnapshot(inkStrokes, this.tempFileIndex);                
+                var tempFile = await this.ReaderWriter.SaveSnapshot(inkStrokes, this.tempFileIndex);
                 this.TempFiles.Add(tempFile);
             }
             else
@@ -136,7 +140,7 @@ namespace MyLecture.Models
         }
 
         public void SaveLecture()
-        {           
+        {
 
         }
 
@@ -147,7 +151,14 @@ namespace MyLecture.Models
                 var savePicker = new FileSavePicker();
                 savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
                 savePicker.FileTypeChoices.Add("InkLecture", new List<string>() { ".smc" });
-                savePicker.SuggestedFileName = titleText;
+                if (titleText.EndsWith(".smc"))
+                {
+                    savePicker.SuggestedFileName = titleText;
+                }
+                else
+                {
+                    savePicker.SuggestedFileName = titleText + ".smc";
+                }
 
                 StorageFile file = await savePicker.PickSaveFileAsync();
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace("SaveFileToken", file);
@@ -186,7 +197,7 @@ namespace MyLecture.Models
             this.Slides = await this.ReaderWriter.OpenAllSlides(file);
         }
 
-        public async Task<bool> ExportToImages()
+        public async Task<bool> ExportToImages(string title)
         {
             try
             {
@@ -197,7 +208,7 @@ namespace MyLecture.Models
 
                 StorageFolder folder = await savePicker.PickSingleFolderAsync();
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImagesFolderToken", folder);
-                await this.ReaderWriter.SaveAllSlidesToImages(this.Slides, folder);
+                await this.ReaderWriter.SaveAllSlidesToImages(this.Slides, folder, title);
                 return true;
             }
             catch

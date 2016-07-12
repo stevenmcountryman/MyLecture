@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.UI;
 using Windows.UI.Input.Inking;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace MyLecture.IO
 {
@@ -18,7 +20,6 @@ namespace MyLecture.IO
         readonly static string LECTUREFOLDER = "Lecture_Root";
         readonly static string TEMPFOLDER = "Temp";
         readonly static string SAVEFOLDER = "Save";
-        readonly static string IMAGESFOLDER = "Lecture Images";
         readonly static string SLIDEFILE = "Slide.ink";
         readonly static string SLIDESAVEFILE = "Slide{0}.ink";
         readonly static string TEMPFILE = "Temp{0}.ink";
@@ -44,11 +45,10 @@ namespace MyLecture.IO
             this.CreateFolderHierarchy();
         }
         
-        public async Task SaveAllSlidesToImages(List<InkStrokeContainer> allSlides, StorageFolder destination)
+        public async Task SaveAllSlidesToImages(List<InkStrokeContainer> allSlides, StorageFolder destination, string folderTitle)
         {
-            this.ImagesFolder = await destination.CreateFolderAsync(IMAGESFOLDER, CreationCollisionOption.ReplaceExisting);
+            this.ImagesFolder = await destination.CreateFolderAsync(folderTitle, CreationCollisionOption.ReplaceExisting);
             CanvasDevice device = CanvasDevice.GetSharedDevice();
-            List<StorageFile> allImages = new List<StorageFile>();
             int imageIndex = 1;
             foreach (var slide in allSlides)
             {
@@ -64,7 +64,6 @@ namespace MyLecture.IO
                 {
                     await renderTarget.SaveAsync(fileStream, CanvasBitmapFileFormat.Jpeg, 1f);
                 }
-                allImages.Add(file);
                 imageIndex++;
             }
         }
