@@ -57,6 +57,7 @@ namespace MyLecture.Views
             this.MainCanvas.InkPresenter.StrokeContainer = this.lectureFactory.OpenSlides();
             this.MainCanvas.InkPresenter.StrokesCollected += InkPresenter_StrokesCollected;
             this.MainCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
+
         }
 
         #region UI Event Handlers
@@ -343,10 +344,23 @@ namespace MyLecture.Views
                 this.RedoTool.IsEnabled = false;
             }
         }
-        private void saveSlide()
+        private async void saveSlide()
         {
+            var handwritingToText = "";
+            if (!this.isMainCanvasEmpty())
+            {
+                var inkRecog = new InkRecognizerContainer();
+                var results = await inkRecog.RecognizeAsync(this.MainCanvas.InkPresenter.StrokeContainer, InkRecognitionTarget.All);                
+                foreach (var result in results)
+                {
+                    handwritingToText += result.GetTextCandidates()[0] + " ";
+                }
+            }
+
             this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
             this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.InkPanel.Background);
+            //this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, handwritingToText, this.InkPanel.Background);
+
         }
         #endregion
 

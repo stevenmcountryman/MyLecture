@@ -142,15 +142,22 @@ namespace MyLecture.IO
         }
         private async Task<InkStrokeContainer> loadInkStrokesFromFile(string fileName, StorageFolder folder)
         {
-            InkStrokeContainer inkStrokes = new InkStrokeContainer();
-            var file = await this.getFile(folder, fileName);
-            var readStream = await file.OpenAsync(FileAccessMode.Read);
-            using (readStream)
+            try
             {
-                await inkStrokes.LoadAsync(readStream);
-                readStream.Dispose();
+                InkStrokeContainer inkStrokes = new InkStrokeContainer();
+                var file = await this.getFile(folder, fileName);
+                var readStream = await file.OpenAsync(FileAccessMode.Read);
+                using (readStream)
+                {
+                    await inkStrokes.LoadAsync(readStream);
+                    readStream.Dispose();
+                }
+                return inkStrokes;
             }
-            return inkStrokes;
+            catch
+            {
+                return null;
+            }
         }
 
         private async Task CreateFolderHierarchy()
