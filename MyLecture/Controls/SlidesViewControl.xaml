@@ -40,6 +40,12 @@
                    Drop="BackgroundShade_Drop"
                    Opacity="0" Fill="Black">
         </Rectangle>
+        <local:Transcriber x:Name="Transcriber"
+                           RelativePanel.RightOf="SlideInPanel"
+                           RelativePanel.AlignRightWithPanel="True"
+                           RelativePanel.AlignTopWithPanel="True"
+                           MaxHeight="200"
+                           TranscribeInkToText="Transcriber_TranscribeInkToText"/>
         <Viewbox x:Name="DeleteIcon"
                  Height="75"
                  Width="75"
@@ -49,7 +55,8 @@
             <SymbolIcon Symbol="Delete"
                         Foreground="Red"/>
         </Viewbox>
-        <RelativePanel RelativePanel.AlignLeftWithPanel="True"
+        <RelativePanel x:Name="SlideInPanel"
+                       RelativePanel.AlignLeftWithPanel="True"
                        RelativePanel.AlignTopWithPanel="True"
                        RelativePanel.AlignBottomWithPanel="True"
                        Background="#FF444444"

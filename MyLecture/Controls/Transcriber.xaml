@@ -1,0 +1,40 @@
+﻿<UserControl
+    x:Class="MyLecture.Controls.Transcriber"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:MyLecture.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <RelativePanel Background="#33003A8F">
+        <TextBlock x:Name="TranscribeButton"
+                   Text="transcribe"
+                   Margin="12"
+                   Padding="0"
+                   FontFamily="Segoe UI Black" 
+                   FontWeight="Bold"
+                   Foreground="White"
+                   FontSize="24"
+                   RelativePanel.AlignTopWithPanel="True"
+                   RelativePanel.AlignHorizontalCenterWithPanel="True" Tapped="TranscribeButton_Tapped"/>
+        <SymbolIcon x:Name="PlayAudioButton"
+                    Symbol="Play"
+                    Margin="12"
+                    Foreground="White"
+                    Visibility="Collapsed"
+                    RelativePanel.AlignVerticalCenterWith="TranscribeButton"
+                    RelativePanel.RightOf="TranscribeButton" Tapped="PlayAudioButton_Tapped"/>
+        <TextBlock x:Name="TranscribedText"
+                   Text="(transcribed notes show here)"
+                   Foreground="White"
+                   RelativePanel.Below="TranscribeButton"
+                   RelativePanel.AlignLeftWithPanel="True"
+                   RelativePanel.AlignRightWithPanel="True"
+                   RelativePanel.AlignBottomWithPanel="True"
+                   Margin="12" TextAlignment="Center"/>
+        <MediaElement x:Name="AudioPlayer" />
+    </RelativePanel>
+</UserControl>

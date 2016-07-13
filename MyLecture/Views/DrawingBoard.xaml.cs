@@ -344,19 +344,8 @@ namespace MyLecture.Views
                 this.RedoTool.IsEnabled = false;
             }
         }
-        private async void saveSlide()
-        {
-            var handwritingToText = "";
-            if (!this.isMainCanvasEmpty())
-            {
-                var inkRecog = new InkRecognizerContainer();
-                var results = await inkRecog.RecognizeAsync(this.MainCanvas.InkPresenter.StrokeContainer, InkRecognitionTarget.All);                
-                foreach (var result in results)
-                {
-                    handwritingToText += result.GetTextCandidates()[0] + " ";
-                }
-            }
-
+        private void saveSlide()
+        {   
             this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
             this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.InkPanel.Background);
             //this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, handwritingToText, this.InkPanel.Background);

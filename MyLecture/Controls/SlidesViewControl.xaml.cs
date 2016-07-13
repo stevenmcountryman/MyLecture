@@ -170,7 +170,19 @@ namespace MyLecture.Controls
                 popUp.Items.Add(moveDownItem);
             }
 
+            MenuFlyoutItem transcribeItem = new MenuFlyoutItem();
+            transcribeItem.Text = "Transcribe";
+            transcribeItem.Click += TranscribeItem_Click; ;
+            popUp.Items.Add(transcribeItem);
+
             popUp.ShowAt(sender as Viewbox);
+        }
+
+        private void TranscribeItem_Click(object sender, RoutedEventArgs e)
+        {
+            var viewbox = this.SlidesGrid.Items[this.SlideIndexToModify] as Viewbox;
+            var inkCanvas = (viewbox.Child as RelativePanel).Children.OfType<InkCanvas>().First();
+            this.Transcriber.TranscribeText(inkCanvas.InkPresenter.StrokeContainer);
         }
 
         private void MoveDownItem_Click(object sender, RoutedEventArgs e)
@@ -287,6 +299,13 @@ namespace MyLecture.Controls
         private void SlideViewButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
             this.CloseSlidesView();
+        }
+
+        private void Transcriber_TranscribeInkToText(object sender, EventArgs e)
+        {
+            var viewbox = this.SlidesGrid.Items[this.SlideIndex] as Viewbox;
+            var inkCanvas = (viewbox.Child as RelativePanel).Children.OfType<InkCanvas>().First();
+            this.Transcriber.TranscribeText(inkCanvas.InkPresenter.StrokeContainer);
         }
     }
 }

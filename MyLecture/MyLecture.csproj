@@ -105,6 +105,9 @@
     <Compile Include="Controls\SlidesViewControl.xaml.cs">
       <DependentUpon>SlidesViewControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Transcriber.xaml.cs">
+      <DependentUpon>Transcriber.xaml</DependentUpon>
+    </Compile>
     <Compile Include="IO\IOReaderWriter.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -162,6 +165,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\SlidesViewControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\Transcriber.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
