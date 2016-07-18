@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Windows.Media.SpeechSynthesis;
 using Windows.UI.Input.Inking;
 using Windows.UI.Xaml;
@@ -17,7 +18,7 @@ namespace MyLecture.Controls
             this.InitializeComponent();
         }
 
-        public async void TranscribeText(InkStrokeContainer inkStrokes)
+        public async Task<string> TranscribeText(InkStrokeContainer inkStrokes)
         {
             var handwritingToText = "";
             if (inkStrokes.GetStrokes().Count > 0)
@@ -30,12 +31,13 @@ namespace MyLecture.Controls
                 }
             }
             this.TranscribedText.Text = handwritingToText;
+            this.PlayAudioButton.Visibility = Visibility.Visible;
+            return handwritingToText;
         }
 
         private void TranscribeButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
             this.TranscribeInkToText(this, new EventArgs());
-            this.PlayAudioButton.Visibility = Visibility.Visible;
         }
 
         private async void PlayAudioButton_Tapped(object sender, TappedRoutedEventArgs e)
@@ -44,8 +46,7 @@ namespace MyLecture.Controls
             SpeechSynthesisStream stream = await synth.SynthesizeTextToStreamAsync(this.TranscribedText.Text);
 
             AudioPlayer.SetSource(stream, stream.ContentType);
-            AudioPlayer.Play();
-            
+            AudioPlayer.Play();            
         }
     }
 }

@@ -42,9 +42,14 @@ namespace MyLecture.IO
         /// </summary>
         public IOReaderWriter()
         {
-            this.CreateFolderHierarchy();
+            this.setUp();
         }
-        
+
+        private async void setUp()
+        {
+            await this.CreateFolderHierarchy();
+        }
+
         public async Task SaveAllSlidesToImages(List<InkStrokeContainer> allSlides, StorageFolder destination, string folderTitle)
         {
             this.ImagesFolder = await destination.CreateFolderAsync(folderTitle, CreationCollisionOption.ReplaceExisting);

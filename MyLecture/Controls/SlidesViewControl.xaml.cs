@@ -19,7 +19,7 @@ namespace MyLecture.Controls
 {
     public sealed partial class SlidesViewControl : UserControl
     {
-        readonly static int HIDDEN = -400;
+        readonly static int HIDDEN = -360;
         readonly static int VISIBLE = 0;
 
         public delegate void SelectionMadeHandler(object sender, EventArgs e);
@@ -178,11 +178,11 @@ namespace MyLecture.Controls
             popUp.ShowAt(sender as Viewbox);
         }
 
-        private void TranscribeItem_Click(object sender, RoutedEventArgs e)
+        private async void TranscribeItem_Click(object sender, RoutedEventArgs e)
         {
             var viewbox = this.SlidesGrid.Items[this.SlideIndexToModify] as Viewbox;
             var inkCanvas = (viewbox.Child as RelativePanel).Children.OfType<InkCanvas>().First();
-            this.Transcriber.TranscribeText(inkCanvas.InkPresenter.StrokeContainer);
+            await this.Transcriber.TranscribeText(inkCanvas.InkPresenter.StrokeContainer);
         }
 
         private void MoveDownItem_Click(object sender, RoutedEventArgs e)
@@ -301,11 +301,11 @@ namespace MyLecture.Controls
             this.CloseSlidesView();
         }
 
-        private void Transcriber_TranscribeInkToText(object sender, EventArgs e)
+        private async void Transcriber_TranscribeInkToText(object sender, EventArgs e)
         {
             var viewbox = this.SlidesGrid.Items[this.SlideIndex] as Viewbox;
             var inkCanvas = (viewbox.Child as RelativePanel).Children.OfType<InkCanvas>().First();
-            this.Transcriber.TranscribeText(inkCanvas.InkPresenter.StrokeContainer);
+            await this.Transcriber.TranscribeText(inkCanvas.InkPresenter.StrokeContainer);
         }
     }
 }

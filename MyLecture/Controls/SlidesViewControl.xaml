@@ -60,9 +60,9 @@
                        RelativePanel.AlignTopWithPanel="True"
                        RelativePanel.AlignBottomWithPanel="True"
                        Background="#FF444444"
-                       Width="400">
+                       Width="360">
             <RelativePanel.RenderTransform>
-                <TranslateTransform x:Name="SlidesViewTranslate" X="-400" />
+                <TranslateTransform x:Name="SlidesViewTranslate" X="-360" />
             </RelativePanel.RenderTransform>
             <TextBlock x:Name="SlideViewButton"
                        FontFamily="Segoe MDL2 Assets"

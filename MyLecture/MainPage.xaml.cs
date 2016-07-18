@@ -6,6 +6,10 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 using System;
+using Windows.UI.Xaml.Media;
+using Windows.UI;
+using Windows.UI.ViewManagement;
+using Windows.Foundation.Metadata;
 
 namespace MyLecture
 {
@@ -17,6 +21,36 @@ namespace MyLecture
         public MainPage()
         {
             this.InitializeComponent();
+
+            this.setTitleBar();
+        }
+
+        private void setTitleBar()
+        {
+
+            if (ApiInformation.IsTypePresent("Windows.UI.ViewManagement.ApplicationView"))
+            {
+                ApplicationView AppView = ApplicationView.GetForCurrentView();
+                AppView.TitleBar.BackgroundColor = Color.FromArgb(255, 0, 145, 92);
+                AppView.TitleBar.ButtonInactiveBackgroundColor = Colors.Gray;
+                AppView.TitleBar.ButtonInactiveForegroundColor = Colors.LightGray;
+                AppView.TitleBar.ButtonBackgroundColor = Color.FromArgb(255, 0, 145, 92);
+                AppView.TitleBar.ButtonForegroundColor = Colors.White;
+                AppView.TitleBar.ButtonHoverBackgroundColor = Color.FromArgb(255, 0, 197, 125);
+                AppView.TitleBar.ButtonHoverForegroundColor = Colors.White;
+                AppView.TitleBar.ButtonPressedBackgroundColor = Color.FromArgb(255, 0, 145, 92);
+                AppView.TitleBar.ButtonPressedForegroundColor = Colors.White;
+                AppView.TitleBar.ForegroundColor = Colors.White;
+                AppView.TitleBar.InactiveBackgroundColor = Colors.Gray;
+                AppView.TitleBar.InactiveForegroundColor = Colors.LightGray;
+            }
+            if (ApiInformation.IsTypePresent("Windows.UI.ViewManagement.StatusBar"))
+            {
+                var statusBar = StatusBar.GetForCurrentView();
+                statusBar.BackgroundOpacity = 1;
+                statusBar.BackgroundColor = Color.FromArgb(255, 0, 145, 92);
+                statusBar.ForegroundColor = Colors.White;
+            }
         }
 
         private void NewLectureButton_Click(object sender, RoutedEventArgs e)
