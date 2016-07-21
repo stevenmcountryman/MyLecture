@@ -10,6 +10,8 @@ using Windows.UI.Xaml.Media;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 using Windows.Foundation.Metadata;
+using Windows.Storage.AccessCache;
+using Windows.UI.Text;
 
 namespace MyLecture
 {
@@ -18,11 +20,42 @@ namespace MyLecture
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private LectureFactory lectureFactory = new LectureFactory();
         public MainPage()
         {
             this.InitializeComponent();
 
             this.setTitleBar();
+            this.setRecentFileList();
+        }
+
+        private void setRecentFileList()
+        {
+
+            foreach(var entry in StorageApplicationPermissions.FutureAccessList.Entries)
+            {
+                var entryPanel = new StackPanel()
+                {
+                    Tag = entry.Token,
+                    Orientation = Orientation.Horizontal                                      
+                };
+                var entryName = new TextBlock()
+                {
+                    Foreground = new SolidColorBrush(Colors.White),
+                    FontWeight = FontWeights.Bold,
+                    Text = entry.Token.Substring(0, entry.Token.IndexOf(".smc")),
+                    Margin = new Thickness(4)
+                };
+                var entryDate = new TextBlock()
+                {
+                    Foreground = new SolidColorBrush(Colors.White),
+                    Text = entry.Token.Substring(entry.Token.IndexOf(".smc") + 4),
+                    Margin = new Thickness(4)
+                };
+                entryPanel.Children.Add(entryName);
+                entryPanel.Children.Add(entryDate);
+                this.RecentFilesList.Items.Add(entryPanel);
+            }
         }
 
         private void setTitleBar()
@@ -68,8 +101,10 @@ namespace MyLecture
                 {
                     var fileArgs = args as Windows.ApplicationModel.Activation.FileActivatedEventArgs;
                     var file = (StorageFile)fileArgs.Files[0];
-                    LectureFactory lectureFactory = new LectureFactory();
-                    await lectureFactory.OpenExistingLecture(file);
+                    var token = file.Name + file.DateCreated.UtcDateTime;
+                    StorageApplicationPermissions.FutureAccessList.AddOrReplace(token, file);
+                    lectureFactory = new LectureFactory();
+                    await lectureFactory.OpenExistingLecture(token);
                     this.Frame.Navigate(typeof(DrawingBoard), lectureFactory);
                 }
             }
@@ -77,7 +112,7 @@ namespace MyLecture
 
         private async void OpenLectureButton_Click(object sender, RoutedEventArgs e)
         {
-            LectureFactory lectureFactory = new LectureFactory();
+            lectureFactory = new LectureFactory();
             if (await lectureFactory.OpenExistingLecture())
             {
                 this.Frame.Navigate(typeof(DrawingBoard), lectureFactory);
@@ -94,6 +129,14 @@ namespace MyLecture
             dialog.Commands.Add(new UICommand("ok"));
             dialog.DefaultCommandIndex = 0;
             await dialog.ShowAsync();
+        }
+
+        private async void RecentFilesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var token = (this.RecentFilesList.SelectedItem as StackPanel).Tag.ToString();
+            
+            await lectureFactory.OpenExistingLecture(token);
+            this.Frame.Navigate(typeof(DrawingBoard), lectureFactory);
         }
     }
 }

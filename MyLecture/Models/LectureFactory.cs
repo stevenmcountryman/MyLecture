@@ -113,6 +113,37 @@ namespace MyLecture.Models
                 return null;
             }
         }
+        public void UpdateRecentFiles(string fileLocation)
+        {
+            var recentFiles = this.ReaderWriter.GetRecentList();
+            if (recentFiles != null)
+            {
+                if (recentFiles.Contains(fileLocation))
+                {
+                    recentFiles.Remove(fileLocation);
+                }
+                recentFiles.Insert(0, fileLocation);
+                var updatedList = recentFiles.GetRange(0, 5).ToArray();
+                this.ReaderWriter.SaveRecentList(updatedList);
+            }
+            else
+            {
+                string[] newList = { fileLocation };
+                this.ReaderWriter.SaveRecentList(newList);
+            }
+        }
+        public List<string> GetRecentFilesList()
+        {
+            var recentFiles = this.ReaderWriter.GetRecentList();
+            if (recentFiles != null)
+            {
+                return recentFiles;
+            }
+            else
+            {
+                return new List<string>();
+            }
+        }
         public InkStrokeContainer LoadNextSnapshot()
         {
             this.tempFileIndex++;
@@ -161,8 +192,9 @@ namespace MyLecture.Models
                 }
 
                 StorageFile file = await savePicker.PickSaveFileAsync();
-                StorageApplicationPermissions.FutureAccessList.AddOrReplace("SaveFileToken", file);
-                await this.ReaderWriter.SaveAllSlides(this.Slides, file);
+                string token = file.Name + file.DateCreated.UtcDateTime;
+                StorageApplicationPermissions.FutureAccessList.AddOrReplace(token, file);
+                await this.ReaderWriter.SaveAllSlides(this.Slides, token);
                 return true;
             }
             catch
@@ -178,11 +210,11 @@ namespace MyLecture.Models
                 var openPicker = new FileOpenPicker();
                 openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
                 openPicker.FileTypeFilter.Add(".smc");
-
                 StorageFile file = await openPicker.PickSingleFileAsync();
                 this.LectureName = file.Name.Replace(".smc", "");
-                StorageApplicationPermissions.FutureAccessList.AddOrReplace("OpenFileToken", file);
-                this.Slides = await this.ReaderWriter.OpenAllSlides(file);
+                string token = file.Name + file.DateCreated.UtcDateTime;
+                StorageApplicationPermissions.FutureAccessList.AddOrReplace(token, file);
+                this.Slides = await this.ReaderWriter.OpenAllSlides(token);
                 return true;
             }
             catch
@@ -191,10 +223,10 @@ namespace MyLecture.Models
             }
         }
 
-        public async Task OpenExistingLecture(StorageFile file)
+        public async Task OpenExistingLecture(string token)
         {
-            this.LectureName = file.Name.Replace(".smc", "");
-            this.Slides = await this.ReaderWriter.OpenAllSlides(file);
+            this.LectureName = token.Substring(0, token.IndexOf(".smc"));
+            this.Slides = await this.ReaderWriter.OpenAllSlides(token);
         }
 
         public async Task<bool> ExportToImages(string title)

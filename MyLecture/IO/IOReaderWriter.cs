@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
+using Windows.Storage.AccessCache;
 using Windows.UI;
 using Windows.UI.Input.Inking;
 using Windows.UI.Xaml.Controls;
@@ -72,7 +74,7 @@ namespace MyLecture.IO
                 imageIndex++;
             }
         }
-        public async Task SaveAllSlides(List<InkStrokeContainer> allSlides, StorageFile destination)
+        public async Task SaveAllSlides(List<InkStrokeContainer> allSlides, string token)
         {
             this.SaveFolder = await this.LectureFolder.CreateFolderAsync(SAVEFOLDER, CreationCollisionOption.ReplaceExisting);
             int slideIndex = 0;
@@ -93,10 +95,12 @@ namespace MyLecture.IO
                 });
                 slideIndex++;
             }
+            StorageFile destination = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(token);
             await tempZip.CopyAndReplaceAsync(destination);
         }
-        public async Task<List<InkStrokeContainer>> OpenAllSlides(StorageFile file)
+        public async Task<List<InkStrokeContainer>> OpenAllSlides(string token)
         {
+            StorageFile file = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(token);
             await this.CreateFolderHierarchy();
             List<InkStrokeContainer> allSlides = new List<InkStrokeContainer>();
             this.SaveFolder = await this.LectureFolder.CreateFolderAsync(SAVEFOLDER, CreationCollisionOption.ReplaceExisting);
@@ -133,6 +137,26 @@ namespace MyLecture.IO
         {
             await this.saveInkStrokesToFile(inkStrokes, SLIDEFILE, this.TempFolder);
             return await this.loadInkStrokesFromFile(SLIDEFILE, this.TempFolder);
+        }
+        public List<string> GetRecentList()
+        {
+            if (ApplicationData.Current.LocalSettings.Values["RecentList"] != null)
+            {
+                var recentFileList = (ApplicationData.Current.LocalSettings.Values["RecentList"] as string[]).ToList<string>();
+                return recentFileList;
+            }
+            else return null;
+        }
+        public void SaveRecentList(string[] recentFileList)
+        {
+            if (ApplicationData.Current.LocalSettings.Values["RecentList"] != null)
+            {
+                ApplicationData.Current.LocalSettings.Values["RecentList"] = recentFileList;
+            }
+            else
+            {
+                ApplicationData.Current.LocalSettings.Values.Add("RecentList", recentFileList);
+            }
         }
         private async Task<StorageFile> saveInkStrokesToFile(InkStrokeContainer inkStrokes, string fileName, StorageFolder folder)
         {
