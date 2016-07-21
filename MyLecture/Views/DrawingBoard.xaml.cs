@@ -442,12 +442,12 @@ namespace MyLecture.Views
 
         private void MainPanel_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (e.NewSize.Width < 600 && e.PreviousSize.Width >= 600)
+            if (e.NewSize.Width < 600 && this.ExpandTool.Visibility == Visibility.Collapsed)
             {
                 this.ExpandTool.Visibility = Visibility.Visible;
                 this.hideExtraTools();
             }
-            else if (e.NewSize.Width >= 600 && e.PreviousSize.Width < 600)
+            else if (e.NewSize.Width >= 600 && this.ExpandTool.Visibility == Visibility.Visible)
             {
                 this.ExpandTool.Visibility = Visibility.Collapsed;
                 this.showExtraTools();
