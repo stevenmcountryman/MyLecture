@@ -442,12 +442,12 @@ namespace MyLecture.Views
 
         private void MainPanel_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (e.NewSize.Width < 600 && this.ExpandTool.Visibility == Visibility.Collapsed)
+            if (e.NewSize.Width < 480 && this.ExpandTool.Visibility == Visibility.Collapsed)
             {
                 this.ExpandTool.Visibility = Visibility.Visible;
                 this.hideExtraTools();
             }
-            else if (e.NewSize.Width >= 600 && this.ExpandTool.Visibility == Visibility.Visible)
+            else if (e.NewSize.Width >= 480 && this.ExpandTool.Visibility == Visibility.Visible)
             {
                 this.ExpandTool.Visibility = Visibility.Collapsed;
                 this.showExtraTools();
@@ -486,7 +486,14 @@ namespace MyLecture.Views
 
         private void MainInkToolbar_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            this.InkToolbarScroller.ChangeView(this.MainInkToolbar.ActualWidth, 0, 1);
+            if (e.NewSize.Width > e.PreviousSize.Width)
+            {
+                this.InkToolbarScroller.ChangeView(this.MainInkToolbar.ActualWidth, 0, 1);
+            }
+            else
+            {
+                this.InkToolbarScroller.ChangeView(0, 0, 1);
+            }
         }
     }
 }

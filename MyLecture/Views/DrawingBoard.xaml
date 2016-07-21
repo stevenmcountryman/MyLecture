@@ -65,20 +65,6 @@
                     ActiveToolChanged="MainInkToolbar_ActiveToolChanged"
                         HorizontalAlignment="Center"
                         SizeChanged="MainInkToolbar_SizeChanged">
-                <InkToolbarCustomPenButton x:Name="CalligraphyPen"
-                                       MinStrokeWidth="1"
-                                       MaxStrokeWidth="3"
-                                       SelectedStrokeWidth="2" 
-                                       Palette="{StaticResource PenSolidColorCollection}"
-                                       IsExtensionGlyphShown="True">
-                    <InkToolbarCustomPenButton.CustomPen>
-                        <controls:CalligraphicPen/>
-                    </InkToolbarCustomPenButton.CustomPen>
-                    <InkToolbarCustomPenButton.ConfigurationContent>
-                        <InkToolbarPenConfigurationControl/>
-                    </InkToolbarCustomPenButton.ConfigurationContent>
-                    <SymbolIcon Symbol="Italic" />
-                </InkToolbarCustomPenButton>
                 <InkToolbarCustomToggleButton x:Name="ExpandTool"
                                         Visibility="Collapsed"
                                         Click="ExpandTool_Click">
