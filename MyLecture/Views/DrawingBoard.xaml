@@ -15,36 +15,12 @@
             <SolidColorBrush Color="Gray" />
             <SolidColorBrush Color="Blue" />
             <SolidColorBrush Color="Green" />
-        </BrushCollection>        
+        </BrushCollection>
     </Page.Resources>
 
     <RelativePanel x:Name="MainPanel"
-                   Background="Gray">
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup x:Name="VisualStateGroup">
-                <VisualState x:Name="VisualStatePhone">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="0"/>
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                    </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="VisualStateTablet">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="640" />
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                    </VisualState.Setters>
-                </VisualState>
-                <VisualState x:Name="VisualStateDesktop">
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="1008" />
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
+                   Background="Gray"
+                   SizeChanged="MainPanel_SizeChanged">
 
         <Viewbox RelativePanel.AlignHorizontalCenterWithPanel="True"
                  RelativePanel.AlignVerticalCenterWithPanel="True">
@@ -78,52 +54,63 @@
                        RelativePanel.AlignLeftWithPanel="True"
                        Tapped="SlideViewButton_Tapped"/>
 
-        <InkToolbar x:Name="MainInkToolbar" 
-                    TargetInkCanvas="{x:Bind MainCanvas}"
-                    RelativePanel.AlignHorizontalCenterWithPanel="True"
+        <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollBarVisibility="Disabled"
+                    RelativePanel.AlignRightWithPanel="True"
+                      RelativePanel.AlignLeftWithPanel="True"
                     RelativePanel.AlignBottomWithPanel="True"
-                    ActiveToolChanged="MainInkToolbar_ActiveToolChanged">
-            <InkToolbarCustomPenButton x:Name="CalligraphyPen"
+                      x:Name="InkToolbarScroller">
+            <InkToolbar x:Name="MainInkToolbar" 
+                    TargetInkCanvas="{x:Bind MainCanvas}"
+                    ActiveToolChanged="MainInkToolbar_ActiveToolChanged"
+                        HorizontalAlignment="Center"
+                        SizeChanged="MainInkToolbar_SizeChanged">
+                <InkToolbarCustomPenButton x:Name="CalligraphyPen"
                                        MinStrokeWidth="1"
                                        MaxStrokeWidth="3"
                                        SelectedStrokeWidth="2" 
                                        Palette="{StaticResource PenSolidColorCollection}"
                                        IsExtensionGlyphShown="True">
-                <InkToolbarCustomPenButton.CustomPen>
-                    <controls:CalligraphicPen/>
-                </InkToolbarCustomPenButton.CustomPen>
-                <InkToolbarCustomPenButton.ConfigurationContent>
-                    <InkToolbarPenConfigurationControl/>
-                </InkToolbarCustomPenButton.ConfigurationContent>
-                <SymbolIcon Symbol="Italic" />
-            </InkToolbarCustomPenButton>
-            <InkToolbarCustomToolButton x:Name="SelectionTool"
-                                        IsExtensionGlyphShown="false"
-                                        IsEnabled="False">
-                <SymbolIcon Symbol="SelectAll" />
-            </InkToolbarCustomToolButton>
-            <InkToolbarCustomToggleButton x:Name="UndoTool"
+                    <InkToolbarCustomPenButton.CustomPen>
+                        <controls:CalligraphicPen/>
+                    </InkToolbarCustomPenButton.CustomPen>
+                    <InkToolbarCustomPenButton.ConfigurationContent>
+                        <InkToolbarPenConfigurationControl/>
+                    </InkToolbarCustomPenButton.ConfigurationContent>
+                    <SymbolIcon Symbol="Italic" />
+                </InkToolbarCustomPenButton>
+                <InkToolbarCustomToggleButton x:Name="ExpandTool"
+                                        Visibility="Collapsed"
+                                        Click="ExpandTool_Click">
+                    <SymbolIcon Symbol="More"/>
+                </InkToolbarCustomToggleButton>
+                <InkToolbarCustomToolButton x:Name="SelectionTool"
+                                        IsExtensionGlyphShown="false">
+                    <SymbolIcon Symbol="SelectAll"/>
+                </InkToolbarCustomToolButton>
+                <InkToolbarCustomToggleButton x:Name="UndoTool"
                                         Click="UndoTool_Click"
                                           IsEnabled="False">
-                <SymbolIcon Symbol="Undo"/>
-            </InkToolbarCustomToggleButton>
-            <InkToolbarCustomToggleButton x:Name="RedoTool"
+                    <SymbolIcon Symbol="Undo"/>
+                </InkToolbarCustomToggleButton>
+                <InkToolbarCustomToggleButton x:Name="RedoTool"
                                         Click="RedoTool_Click"
                                           IsEnabled="False">
-                <SymbolIcon Symbol="Redo"/>
-            </InkToolbarCustomToggleButton>
-            <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" 
+                    <SymbolIcon Symbol="Redo"/>
+                </InkToolbarCustomToggleButton>
+                <InkToolbarCustomToggleButton x:Name="ToggleTouchInkingButton" 
                                           Checked="ToggleTouchInkingButton_Checked" 
                                           Unchecked="ToggleTouchInkingButton_Unchecked">
-                <SymbolIcon Symbol="TouchPointer" />
-            </InkToolbarCustomToggleButton>
-            <InkToolbarCustomToggleButton x:Name="ToggleBackgroundColor" 
+                    <SymbolIcon Symbol="TouchPointer" />
+                </InkToolbarCustomToggleButton>
+                <InkToolbarCustomToggleButton x:Name="ToggleBackgroundColor" 
                                           Checked="ToggleBackgroundColor_Checked" 
                                           Unchecked="ToggleBackgroundColor_Unchecked">
-                <SymbolIcon Symbol="Page" />
-            </InkToolbarCustomToggleButton>
-        </InkToolbar>
-        
+                    <SymbolIcon Symbol="Page" />
+                </InkToolbarCustomToggleButton>
+            </InkToolbar>
+        </ScrollViewer>
+
         <controls:SlidesViewControl x:Name="SlidesView"
                                     RelativePanel.AlignBottomWithPanel="True"
                                     RelativePanel.AlignLeftWithPanel="True"

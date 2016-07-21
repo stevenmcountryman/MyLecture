@@ -3,6 +3,7 @@ using MyLecture.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Core;
@@ -129,14 +130,6 @@ namespace MyLecture.Views
             this.UndoTool.IsEnabled = true;
             this.RedoTool.IsEnabled = false;
             this.lastTool = this.MainInkToolbar.ActiveTool;
-            if (!this.isMainCanvasEmpty())
-            {
-                this.SelectionTool.IsEnabled = true;
-            }
-            else
-            {
-                this.SelectionTool.IsEnabled = false;
-            }
             this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
             this.saveSlide();
         }
@@ -389,14 +382,6 @@ namespace MyLecture.Views
         {
             this.SlidesView.SlidesClosed -= SlidesView_SlidesClosed;
             this.SlidesView.Visibility = Visibility.Collapsed;
-            if (!this.isMainCanvasEmpty())
-            {
-                this.SelectionTool.IsEnabled = true;
-            }
-            else
-            {
-                this.SelectionTool.IsEnabled = false;
-            }
         }
         private async void SlidesView_SaveButtonTapped(object sender, EventArgs e)
         {
@@ -454,5 +439,54 @@ namespace MyLecture.Views
             await dialog.ShowAsync();
         }
         #endregion
+
+        private void MainPanel_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (e.NewSize.Width < 600 && e.PreviousSize.Width >= 600)
+            {
+                this.ExpandTool.Visibility = Visibility.Visible;
+                this.hideExtraTools();
+            }
+            else if (e.NewSize.Width >= 600 && e.PreviousSize.Width < 600)
+            {
+                this.ExpandTool.Visibility = Visibility.Collapsed;
+                this.showExtraTools();
+            }
+        }
+
+        private void hideExtraTools()
+        {
+            this.UndoTool.Visibility = Visibility.Collapsed;
+            this.RedoTool.Visibility = Visibility.Collapsed;
+            this.ToggleTouchInkingButton.Visibility = Visibility.Collapsed;
+            this.ToggleBackgroundColor.Visibility = Visibility.Collapsed;
+        }
+        private void showExtraTools()
+        {
+            this.UndoTool.Visibility = Visibility.Visible;
+            this.RedoTool.Visibility = Visibility.Visible;
+            this.ToggleTouchInkingButton.Visibility = Visibility.Visible;
+            this.ToggleBackgroundColor.Visibility = Visibility.Visible;
+        }
+
+        private void ExpandTool_Click(object sender, RoutedEventArgs e)
+        {
+            this.ExpandTool.IsChecked = false;
+            this.MainInkToolbar.ActiveTool = this.lastTool;
+
+            if (this.UndoTool.Visibility == Visibility.Visible)
+            {
+                this.hideExtraTools();
+            }
+            else
+            {
+                this.showExtraTools();
+            }
+        }
+
+        private void MainInkToolbar_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            this.InkToolbarScroller.ChangeView(this.MainInkToolbar.ActualWidth, 0, 1);
+        }
     }
 }

@@ -74,7 +74,7 @@ namespace MyLecture.Models
         public void ClearSnapshots()
         {
             this.TempFiles.Clear();
-            this.tempFileIndex = -1;
+            this.tempFileIndex = 0;
         }
         public async void SaveSnapshot(InkStrokeContainer inkStrokes)
         {
@@ -95,7 +95,7 @@ namespace MyLecture.Models
         }
         public bool CanGoBack()
         {
-            return tempFileIndex > 0;
+            return tempFileIndex > -1;
         }
         public bool CanGoForward()
         {
