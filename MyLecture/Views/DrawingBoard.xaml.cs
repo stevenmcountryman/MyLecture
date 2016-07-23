@@ -48,14 +48,22 @@ namespace MyLecture.Views
             if (e.Parameter != null)
             {
                 this.lectureFactory = e.Parameter as LectureFactory;
-                this.SlidesView.ShowLoadedSlides(this.lectureFactory.GetAllSlides(), this.lectureFactory.LectureName);
+                this.SlidesView.ShowLoadedSlides(this.lectureFactory.GetAllSlides(), this.lectureFactory.GetSlideBackgroundConfig(), this.lectureFactory.LectureName);
             }
             else
             {
                 this.lectureFactory = new LectureFactory();
                 this.lectureFactory.CreateNewLecture();
             }
-            this.MainCanvas.InkPresenter.StrokeContainer = this.lectureFactory.OpenSlides();
+            this.MainCanvas.InkPresenter.StrokeContainer = this.lectureFactory.GetSlideAt(0);
+            if (this.lectureFactory.SlideBackgroundIsWhite(0))
+            {
+                this.InkPanel.Background = this.whiteColor;
+            }
+            else
+            {
+                this.InkPanel.Background = this.blackColor;
+            }
             this.MainCanvas.InkPresenter.StrokesCollected += InkPresenter_StrokesCollected;
             this.MainCanvas.InkPresenter.StrokesErased += InkPresenter_StrokesErased;
 
@@ -322,11 +330,15 @@ namespace MyLecture.Views
             this.resetSnapshotMemory();
         }
         private void saveSlide()
-        {   
-            this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.SlidesView.SlideIndex);
-            this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.InkPanel.Background);
-            //this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, handwritingToText, this.InkPanel.Background);
+        {
+            bool isBackgroundWhite = false;
+            if ((this.InkPanel.Background as SolidColorBrush).Color == Colors.White)
+            {
+                isBackgroundWhite = true;
+            }
 
+            this.lectureFactory.SaveSlide(this.MainCanvas.InkPresenter.StrokeContainer, isBackgroundWhite, this.SlidesView.SlideIndex);
+            this.SlidesView.UpdateSlide(this.MainCanvas.InkPresenter.StrokeContainer, this.InkPanel.Background);
         }
         #endregion
 
@@ -341,6 +353,14 @@ namespace MyLecture.Views
             this.clearCanvas();
             var chosenSlide = this.lectureFactory.GetSlideAt(this.SlidesView.SlideIndex);
             this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
+            if (this.lectureFactory.SlideBackgroundIsWhite(this.SlidesView.SlideIndex))
+            {
+                this.InkPanel.Background = this.whiteColor;
+            }
+            else
+            {
+                this.InkPanel.Background = this.blackColor;
+            }
             this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
             this.closeSlidesView();
         }

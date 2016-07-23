@@ -85,14 +85,28 @@ namespace MyLecture.Controls
             this.SlidesViewSlide.Begin();
         }
 
-        public void ShowLoadedSlides(List<InkStrokeContainer> slides, string lectureName)
+        public void ShowLoadedSlides(List<InkStrokeContainer> slides, List<bool> slideBackgroundConfig, string lectureName)
         {
-            this.UpdateSlide(slides[0], new SolidColorBrush(Colors.White));
+            if (slideBackgroundConfig[0] == true)
+            {
+                this.UpdateSlide(slides[0], new SolidColorBrush(Colors.White));
+            }
+            else
+            {
+                this.UpdateSlide(slides[0], new SolidColorBrush(Colors.Black));
+            }
             for (int i = 1; i < slides.Count(); i++)
             {
                 this.SlideIndex++;
                 this.createNewBlankSlide();
-                this.UpdateSlide(slides[i], new SolidColorBrush(Colors.White));
+                if (slideBackgroundConfig[i] == true)
+                {
+                    this.UpdateSlide(slides[i], new SolidColorBrush(Colors.White));
+                }
+                else
+                {
+                    this.UpdateSlide(slides[i], new SolidColorBrush(Colors.Black));
+                }
             }
             this.SlideIndex = 0;
             this.TitleText.Text = lectureName;

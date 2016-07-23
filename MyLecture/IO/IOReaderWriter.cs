@@ -9,8 +9,6 @@ using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.UI;
 using Windows.UI.Input.Inking;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace MyLecture.IO
 {
@@ -52,7 +50,7 @@ namespace MyLecture.IO
             await this.CreateFolderHierarchy();
         }
 
-        public async Task SaveAllSlidesToImages(List<InkStrokeContainer> allSlides, StorageFolder destination, string folderTitle)
+        public async Task SaveAllSlidesToImages(List<InkStrokeContainer> allSlides, List<bool> slideBackgroundConfig, StorageFolder destination, string folderTitle)
         {
             this.ImagesFolder = await destination.CreateFolderAsync(folderTitle, CreationCollisionOption.ReplaceExisting);
             CanvasDevice device = CanvasDevice.GetSharedDevice();
@@ -63,7 +61,14 @@ namespace MyLecture.IO
 
                 using (var drawingSession = renderTarget.CreateDrawingSession())
                 {
-                    drawingSession.Clear(Colors.White);
+                    if (slideBackgroundConfig[imageIndex - 1] == true)
+                    {
+                        drawingSession.Clear(Colors.White);
+                    }
+                    else
+                    {
+                        drawingSession.Clear(Colors.Black);
+                    }
                     drawingSession.DrawInk(slide.GetStrokes());
                 }
                 var file = await this.createFile(this.ImagesFolder, string.Format(IMAGEFILE, imageIndex));
@@ -74,7 +79,7 @@ namespace MyLecture.IO
                 imageIndex++;
             }
         }
-        public async Task SaveAllSlides(List<InkStrokeContainer> allSlides, string token)
+        public async Task SaveAllSlides(List<InkStrokeContainer> allSlides, List<bool> backgroundConfig, string token)
         {
             this.SaveFolder = await this.LectureFolder.CreateFolderAsync(SAVEFOLDER, CreationCollisionOption.ReplaceExisting);
             int slideIndex = 0;
@@ -95,6 +100,18 @@ namespace MyLecture.IO
                 });
                 slideIndex++;
             }
+            var config = await this.SaveAllSlidesConfig(backgroundConfig);
+            await Task.Run(() =>
+            {
+                using (FileStream stream = new FileStream(tempZip.Path, FileMode.Open))
+                {
+                    using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Update))
+                    {
+
+                        archive.CreateEntryFromFile(config.Path, config.Name);
+                    }
+                }
+            });
             StorageFile destination = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(token);
             await tempZip.CopyAndReplaceAsync(destination);
         }
@@ -115,8 +132,8 @@ namespace MyLecture.IO
                         {
                             var fileName = string.Format(SLIDESAVEFILE, slideIndex);
                             entry.ExtractToFile(Path.Combine(this.SaveFolder.Path, fileName));
+                            slideIndex++;
                         }
-                        slideIndex++;
                     }
                 }
             });
@@ -126,6 +143,44 @@ namespace MyLecture.IO
                 allSlides.Add(inkStrokes);
             }
             return allSlides;
+        }
+        public async Task<List<bool>> OpenSlideConfig(string token)
+        {
+            StorageFile file = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(token);
+            List<bool> slideBackgroundWhite = new List<bool>();
+            await Task.Run(() =>
+            {
+                using (ZipArchive archive = ZipFile.OpenRead(file.Path))
+                {
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        if (entry.FullName.EndsWith(".txt", StringComparison.OrdinalIgnoreCase))
+                        {
+                            entry.ExtractToFile(Path.Combine(this.SaveFolder.Path, "Config.txt"));
+                        }
+                    }
+                }
+            });
+            StorageFile config = await StorageFile.GetFileFromPathAsync(Path.Combine(this.SaveFolder.Path, "Config.txt"));
+            using (var stream = await config.OpenStreamForReadAsync())
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string entry = "";
+                    while ((entry = reader.ReadLine()) != null)
+                    {
+                        if (entry == "white")
+                        {
+                            slideBackgroundWhite.Add(true);
+                        }
+                        else
+                        {
+                            slideBackgroundWhite.Add(false);
+                        }
+                    }
+                }
+            }
+            return slideBackgroundWhite;
         }
         public async Task<InkStrokeContainer> SaveSnapshot(InkStrokeContainer inkStrokes, int index)
         {
@@ -221,6 +276,28 @@ namespace MyLecture.IO
             }
             StorageFile destination = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(token);
             await tempText.CopyAndReplaceAsync(destination);
+        }
+        private async Task<StorageFile> SaveAllSlidesConfig(List<bool> backgroundConfig)
+        {
+            StorageFile config = await this.createFile(this.SaveFolder, "Config.txt");
+            using (var stream = await config.OpenStreamForWriteAsync())
+            {
+                using (StreamWriter writer = new StreamWriter(stream))
+                {
+                    foreach(var entry in backgroundConfig)
+                    {
+                        if (entry == true)
+                        {
+                            await writer.WriteLineAsync("white");
+                        }
+                        else
+                        {
+                            await writer.WriteLineAsync("black");
+                        }
+                    }
+                }
+            }
+            return config;
         }
 
         private async Task<string> transcribeSlideToText(InkStrokeContainer inkStrokes)

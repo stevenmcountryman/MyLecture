@@ -14,6 +14,7 @@ namespace MyLecture.Models
     {
         private IOReaderWriter ReaderWriter;
         private List<InkStrokeContainer> Slides;
+        private List<bool> SlidesBackgroundWhite;
         private List<InkStrokeContainer> UndoMemory;
         private List<InkStrokeContainer> RedoMemory;
         private InkStrokeContainer currentMemory;
@@ -34,16 +35,20 @@ namespace MyLecture.Models
         public void CreateNewLecture()
         {
             this.createNewSlideCollection();
-        }
-
-        public InkStrokeContainer OpenSlides()
-        {
-            return this.GetSlideAt(0);
-        }
+        }        
 
         public InkStrokeContainer GetSlideAt(int index)
         {
             return this.Slides[index];
+        }
+        public bool SlideBackgroundIsWhite(int index)
+        {
+            return this.SlidesBackgroundWhite[index];
+        }
+
+        public List<bool> GetSlideBackgroundConfig()
+        {
+            return this.SlidesBackgroundWhite;
         }
 
         public void DeleteSlide(int slideIndexToDelete)
@@ -66,6 +71,7 @@ namespace MyLecture.Models
         public InkStrokeContainer AddNewBlankSlide()
         {
             this.Slides.Add(new InkStrokeContainer());
+            this.SlidesBackgroundWhite.Add(true);
             return this.Slides.Last();
         }
 
@@ -145,7 +151,7 @@ namespace MyLecture.Models
             }
         }
 
-        public async void SaveSlide(InkStrokeContainer inkStrokes, int slideIndex)
+        public async void SaveSlide(InkStrokeContainer inkStrokes, bool backgroundIsWhite, int slideIndex)
         {
             if (inkStrokes.GetStrokes().Count() > 0)
             {
@@ -154,8 +160,9 @@ namespace MyLecture.Models
             }
             else
             {
-                this.Slides[slideIndex] = inkStrokes;
+                this.Slides[slideIndex] = new InkStrokeContainer();
             }
+            this.SlidesBackgroundWhite[slideIndex] = backgroundIsWhite;
         }
 
         public void SaveLecture()
@@ -182,7 +189,7 @@ namespace MyLecture.Models
                 StorageFile file = await savePicker.PickSaveFileAsync();
                 string token = file.Name + file.DateCreated.UtcDateTime;
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace(token, file);
-                await this.ReaderWriter.SaveAllSlides(this.Slides, token);
+                await this.ReaderWriter.SaveAllSlides(this.Slides, this.SlidesBackgroundWhite, token);
                 return true;
             }
             catch
@@ -203,6 +210,7 @@ namespace MyLecture.Models
                 string token = file.Name + file.DateCreated.UtcDateTime;
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace(token, file);
                 this.Slides = await this.ReaderWriter.OpenAllSlides(token);
+                this.SlidesBackgroundWhite = await this.ReaderWriter.OpenSlideConfig(token);
                 return true;
             }
             catch
@@ -215,6 +223,7 @@ namespace MyLecture.Models
         {
             this.LectureName = token.Substring(0, token.IndexOf(".smc"));
             this.Slides = await this.ReaderWriter.OpenAllSlides(token);
+            this.SlidesBackgroundWhite = await this.ReaderWriter.OpenSlideConfig(token);
         }
 
         public async Task<bool> ExportToImages(string title)
@@ -228,7 +237,7 @@ namespace MyLecture.Models
 
                 StorageFolder folder = await savePicker.PickSingleFolderAsync();
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImagesFolderToken", folder);
-                await this.ReaderWriter.SaveAllSlidesToImages(this.Slides, folder, title);
+                await this.ReaderWriter.SaveAllSlidesToImages(this.Slides, this.SlidesBackgroundWhite, folder, title);
                 return true;
             }
             catch
@@ -268,6 +277,7 @@ namespace MyLecture.Models
         private void createNewSlideCollection()
         {
             this.Slides = new List<InkStrokeContainer>();
+            this.SlidesBackgroundWhite = new List<bool>();
             this.AddNewBlankSlide();
         }
     }
