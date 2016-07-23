@@ -56,9 +56,9 @@
 
         <ScrollViewer HorizontalScrollBarVisibility="Hidden"
                       VerticalScrollBarVisibility="Disabled"
-                    RelativePanel.AlignRightWithPanel="True"
+                      RelativePanel.AlignRightWithPanel="True"
                       RelativePanel.AlignLeftWithPanel="True"
-                    RelativePanel.AlignBottomWithPanel="True"
+                      RelativePanel.AlignBottomWithPanel="True"
                       x:Name="InkToolbarScroller">
             <InkToolbar x:Name="MainInkToolbar" 
                     TargetInkCanvas="{x:Bind MainCanvas}"
@@ -108,6 +108,7 @@
                                     SaveButtonTapped="SlidesView_SaveButtonTapped"
                                     ExportButtonPressed="SlidesView_ExportButtonPressed"
                                     SlideDeleted="SlidesView_SlideDeleted"
-                                    SlideMoved="SlidesView_SlideMoved"/>
+                                    SlideMoved="SlidesView_SlideMoved"
+                                    ExportAsTextButtonPressed="SlidesView_ExportAsTextButtonPressed"/>
     </RelativePanel>
 </Page>

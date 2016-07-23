@@ -39,13 +39,7 @@
                    DragLeave="BackgroundShade_DragLeave"
                    Drop="BackgroundShade_Drop"
                    Opacity="0" Fill="Black">
-        </Rectangle>
-        <local:Transcriber x:Name="Transcriber"
-                           RelativePanel.RightOf="SlideInPanel"
-                           RelativePanel.AlignRightWithPanel="True"
-                           RelativePanel.AlignTopWithPanel="True"
-                           MaxHeight="200"
-                           TranscribeInkToText="Transcriber_TranscribeInkToText"/>
+        </Rectangle>        
         <Viewbox x:Name="DeleteIcon"
                  Height="75"
                  Width="75"
@@ -105,21 +99,58 @@
                       Margin="24,12,24,12"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
                       RelativePanel.Below="SlidesText"
-                      RelativePanel.Above="ExportButton"
+                      RelativePanel.Above="ExportAsImagesButton"
                       ReorderMode="Enabled"
                       CanDragItems="True"
                       AllowDrop="True"
                       DragItemsStarting="SlidesGrid_DragItemsStarting">
-            </GridView>            
-            <TextBlock x:Name="ExportButton"
+            </GridView>
+            <TextBlock x:Name="ExportAsImagesButton"
                        Text="save as images"
-                       Margin="24,24,24,24"
+                       Margin="24,24,24,4"
+                       FontSize="24"
+                       Foreground="White"
+                       FontWeight="Bold"
+                       RelativePanel.Above="ExportAsTextButton"
+                       RelativePanel.AlignHorizontalCenterWithPanel="True"
+                       Tapped="ExportButton_Tapped"/>
+            <TextBlock x:Name="ExportAsTextButton"
+                       Text="save as text"
+                       Margin="24,4,24,24"
                        FontSize="24"
                        Foreground="White"
                        FontWeight="Bold"
                        RelativePanel.AlignBottomWithPanel="True"
                        RelativePanel.AlignHorizontalCenterWithPanel="True"
-                       Tapped="ExportButton_Tapped"/>
-        </RelativePanel>        
+                       Tapped="ExportAsTextButton_Tapped"/>
+        </RelativePanel>
+        <RelativePanel x:Name="TranscriberPanel"
+                       RelativePanel.AlignLeftWithPanel="True"
+                       RelativePanel.AlignRightWithPanel="True"
+                       RelativePanel.AlignBottomWithPanel="True"
+                       RelativePanel.AlignTopWithPanel="True"
+                       Visibility="Collapsed">
+            <Rectangle Fill="#99000000"
+                       RelativePanel.AlignLeftWithPanel="True"
+                       RelativePanel.AlignRightWithPanel="True"
+                       RelativePanel.AlignBottomWithPanel="True"
+                       RelativePanel.AlignTopWithPanel="True"/>
+            <local:Transcriber x:Name="Transcriber"
+                           RelativePanel.AlignLeftWithPanel="True"
+                           RelativePanel.AlignRightWithPanel="True"
+                           RelativePanel.AlignVerticalCenterWithPanel="True"   
+                           RelativePanel.AlignHorizontalCenterWithPanel="True"
+                           Margin="24"
+                           MaxHeight="240"
+                           MaxWidth="400"
+                           TranscribeInkToText="Transcriber_TranscribeInkToText"/>
+            <TextBlock Text="back"
+                       FontWeight="Bold"
+                       FontSize="24"
+                       Foreground="White"
+                       RelativePanel.Below="Transcriber"
+                       RelativePanel.AlignHorizontalCenterWithPanel="True"
+                       Tapped="TextBlock_Tapped"/>
+        </RelativePanel>
     </RelativePanel>
 </UserControl>

@@ -37,6 +37,9 @@ namespace MyLecture.Controls
         public delegate void ExportHandler(object sender, EventArgs e);
         public event ExportHandler ExportButtonPressed;
 
+        public delegate void ExportTextHandler(object sender, EventArgs e);
+        public event ExportTextHandler ExportAsTextButtonPressed;
+
         public delegate void SlideDeleteHandler(object sender, EventArgs e);
         public event SlideDeleteHandler SlideDeleted;
 
@@ -183,6 +186,8 @@ namespace MyLecture.Controls
             var viewbox = this.SlidesGrid.Items[this.SlideIndexToModify] as Viewbox;
             var inkCanvas = (viewbox.Child as RelativePanel).Children.OfType<InkCanvas>().First();
             await this.Transcriber.TranscribeText(inkCanvas.InkPresenter.StrokeContainer);
+            await this.Transcriber.TranscribeText(inkCanvas.InkPresenter.StrokeContainer);
+            this.TranscriberPanel.Visibility = Visibility.Visible;
         }
 
         private void MoveDownItem_Click(object sender, RoutedEventArgs e)
@@ -306,6 +311,17 @@ namespace MyLecture.Controls
             var viewbox = this.SlidesGrid.Items[this.SlideIndex] as Viewbox;
             var inkCanvas = (viewbox.Child as RelativePanel).Children.OfType<InkCanvas>().First();
             await this.Transcriber.TranscribeText(inkCanvas.InkPresenter.StrokeContainer);
+            this.TranscriberPanel.Visibility = Visibility.Visible;
+        }
+
+        private void TextBlock_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            this.TranscriberPanel.Visibility = Visibility.Collapsed;
+        }
+
+        private void ExportAsTextButton_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            this.ExportAsTextButtonPressed(this, new EventArgs());
         }
     }
 }

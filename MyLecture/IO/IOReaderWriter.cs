@@ -194,6 +194,50 @@ namespace MyLecture.IO
             this.LectureFolder = await ApplicationData.Current.LocalFolder.CreateFolderAsync(LECTUREFOLDER, CreationCollisionOption.ReplaceExisting);
             this.TempFolder = await this.LectureFolder.CreateFolderAsync(TEMPFOLDER, CreationCollisionOption.ReplaceExisting);
         }
+
+        public async Task SaveAllSlidesToText(List<InkStrokeContainer> allSlides, string token)
+        {
+            this.SaveFolder = await this.LectureFolder.CreateFolderAsync(SAVEFOLDER, CreationCollisionOption.ReplaceExisting);
+            StorageFile tempText = await this.createFile(this.SaveFolder, "TempText");
+            int slideIndex = 1;
+            using (var stream = await tempText.OpenStreamForWriteAsync())
+            {
+                using (StreamWriter writer = new StreamWriter(stream))
+                {
+                    foreach (InkStrokeContainer slide in allSlides)
+                    {
+                        var title = string.Format("Slide {0}:", slideIndex);
+                        var text = "";
+                        if (slide.GetStrokes().Count > 0)
+                        {
+                            text = await this.transcribeSlideToText(slide);
+                        }
+                        await writer.WriteLineAsync(title);
+                        await writer.WriteLineAsync(text);
+                        await writer.WriteLineAsync("-----");
+                        slideIndex++;
+                    }
+                }
+            }
+            StorageFile destination = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(token);
+            await tempText.CopyAndReplaceAsync(destination);
+        }
+
+        private async Task<string> transcribeSlideToText(InkStrokeContainer inkStrokes)
+        {
+            var handwritingToText = "";
+            if (inkStrokes.GetStrokes().Count > 0)
+            {
+                var inkRecog = new InkRecognizerContainer();
+                var results = await inkRecog.RecognizeAsync(inkStrokes, InkRecognitionTarget.All);
+                foreach (var result in results)
+                {
+                    handwritingToText += result.GetTextCandidates()[0] + " ";
+                }
+            }
+            return handwritingToText;
+        }
+
         private async Task<StorageFile> createFile(StorageFolder folder, string fileName)
         {
             return await folder.CreateFileAsync(fileName, CreationCollisionOption.ReplaceExisting);

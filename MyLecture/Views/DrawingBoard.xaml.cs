@@ -479,5 +479,17 @@ namespace MyLecture.Views
                 this.InkToolbarScroller.ChangeView(0, 0, 1);
             }
         }
+
+        private async void SlidesView_ExportAsTextButtonPressed(object sender, EventArgs e)
+        {
+            if (await this.lectureFactory.ExportToText(this.SlidesView.GetTitle()))
+            {
+                this.showDialog("Success", "Text file saved successfully!");
+            }
+            else
+            {
+                this.showDialog("Failure", "Error saving text. Try again.");
+            }
+        }
     }
 }

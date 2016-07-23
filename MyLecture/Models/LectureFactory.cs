@@ -237,6 +237,34 @@ namespace MyLecture.Models
             }
         }
 
+        public async Task<bool> ExportToText(string titleText)
+        {
+            try
+            {
+                var savePicker = new FileSavePicker();
+                savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+                savePicker.FileTypeChoices.Add("Text File", new List<string>() { ".txt" });
+                if (titleText.EndsWith(".txt"))
+                {
+                    savePicker.SuggestedFileName = titleText;
+                }
+                else
+                {
+                    savePicker.SuggestedFileName = titleText + ".txt";
+                }
+
+                StorageFile file = await savePicker.PickSaveFileAsync();
+                string token = file.Name + file.DateCreated.UtcDateTime;
+                StorageApplicationPermissions.FutureAccessList.AddOrReplace(token, file);
+                await this.ReaderWriter.SaveAllSlidesToText(this.Slides, token);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private void createNewSlideCollection()
         {
             this.Slides = new List<InkStrokeContainer>();

@@ -34,35 +34,37 @@ namespace MyLecture
             this.RecentFilesList.Items.Clear();
             foreach(var entry in StorageApplicationPermissions.FutureAccessList.Entries)
             {
-                try
+                if (entry.Token.Contains(".smc"))
                 {
-                    StorageFile file = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(entry.Token);
-
-                    var entryPanel = new StackPanel()
+                    try
                     {
-                        Tag = entry.Token,
-                        Orientation = Orientation.Horizontal
-                    };
-                    var entryName = new TextBlock()
+                        StorageFile file = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(entry.Token);
+                        var entryPanel = new StackPanel()
+                        {
+                            Tag = entry.Token,
+                            Orientation = Orientation.Horizontal
+                        };
+                        var entryName = new TextBlock()
+                        {
+                            Foreground = new SolidColorBrush(Colors.White),
+                            FontWeight = FontWeights.Bold,
+                            Text = entry.Token.Substring(0, entry.Token.IndexOf(".smc")),
+                            Margin = new Thickness(4)
+                        };
+                        var entryDate = new TextBlock()
+                        {
+                            Foreground = new SolidColorBrush(Colors.White),
+                            Text = entry.Token.Substring(entry.Token.IndexOf(".smc") + 4),
+                            Margin = new Thickness(4)
+                        };
+                        entryPanel.Children.Add(entryName);
+                        entryPanel.Children.Add(entryDate);
+                        this.RecentFilesList.Items.Add(entryPanel);
+                    }
+                    catch
                     {
-                        Foreground = new SolidColorBrush(Colors.White),
-                        FontWeight = FontWeights.Bold,
-                        Text = entry.Token.Substring(0, entry.Token.IndexOf(".smc")),
-                        Margin = new Thickness(4)
-                    };
-                    var entryDate = new TextBlock()
-                    {
-                        Foreground = new SolidColorBrush(Colors.White),
-                        Text = entry.Token.Substring(entry.Token.IndexOf(".smc") + 4),
-                        Margin = new Thickness(4)
-                    };
-                    entryPanel.Children.Add(entryName);
-                    entryPanel.Children.Add(entryDate);
-                    this.RecentFilesList.Items.Add(entryPanel);
-                }
-                catch
-                {
-                    StorageApplicationPermissions.FutureAccessList.Remove(entry.Token);
+                        StorageApplicationPermissions.FutureAccessList.Remove(entry.Token);
+                    }
                 }
             }
         }
