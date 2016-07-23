@@ -123,15 +123,15 @@ namespace MyLecture.Views
         private void clearCanvas()
         {
             this.MainCanvas.InkPresenter.StrokeContainer = new InkStrokeContainer();
+            this.lectureFactory.ClearSnapshots();
             this.resetSnapshotMemory();
         }
         private void updateInkCanvasAndTools()
         {
-            this.UndoTool.IsEnabled = true;
-            this.RedoTool.IsEnabled = false;
             this.lastTool = this.MainInkToolbar.ActiveTool;
             this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
             this.saveSlide();
+            this.resetSnapshotMemory();
         }
         private void toggleTouchInking(bool canTouch)
         {
@@ -190,9 +190,10 @@ namespace MyLecture.Views
         #region IOReadWrite Helpers
         private void resetSnapshotMemory()
         {
-            this.UndoTool.IsEnabled = false;
-            this.RedoTool.IsEnabled = false;
-            this.lectureFactory.ClearSnapshots();
+            this.UndoTool.IsChecked = false;
+            this.RedoTool.IsChecked = false;
+            this.UndoTool.IsEnabled = this.lectureFactory.CanGoBack();
+            this.RedoTool.IsEnabled = this.lectureFactory.CanGoForward();
         }
         #endregion
 
@@ -317,25 +318,8 @@ namespace MyLecture.Views
         }
         private void updateUndoRedoTools()
         {
-            this.UndoTool.IsChecked = false;
-            this.RedoTool.IsChecked = false;
             this.MainInkToolbar.ActiveTool = this.lastTool;
-            if (this.lectureFactory.CanGoBack())
-            {
-                this.UndoTool.IsEnabled = true;
-            }
-            else
-            {
-                this.UndoTool.IsEnabled = false;
-            }
-            if (this.lectureFactory.CanGoForward())
-            {
-                this.RedoTool.IsEnabled = true;
-            }
-            else
-            {
-                this.RedoTool.IsEnabled = false;
-            }
+            this.resetSnapshotMemory();
         }
         private void saveSlide()
         {   

@@ -29,32 +29,41 @@ namespace MyLecture
             this.setRecentFileList();
         }
 
-        private void setRecentFileList()
+        private async void setRecentFileList()
         {
-
+            this.RecentFilesList.Items.Clear();
             foreach(var entry in StorageApplicationPermissions.FutureAccessList.Entries)
             {
-                var entryPanel = new StackPanel()
+                try
                 {
-                    Tag = entry.Token,
-                    Orientation = Orientation.Horizontal                                      
-                };
-                var entryName = new TextBlock()
+                    StorageFile file = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(entry.Token);
+
+                    var entryPanel = new StackPanel()
+                    {
+                        Tag = entry.Token,
+                        Orientation = Orientation.Horizontal
+                    };
+                    var entryName = new TextBlock()
+                    {
+                        Foreground = new SolidColorBrush(Colors.White),
+                        FontWeight = FontWeights.Bold,
+                        Text = entry.Token.Substring(0, entry.Token.IndexOf(".smc")),
+                        Margin = new Thickness(4)
+                    };
+                    var entryDate = new TextBlock()
+                    {
+                        Foreground = new SolidColorBrush(Colors.White),
+                        Text = entry.Token.Substring(entry.Token.IndexOf(".smc") + 4),
+                        Margin = new Thickness(4)
+                    };
+                    entryPanel.Children.Add(entryName);
+                    entryPanel.Children.Add(entryDate);
+                    this.RecentFilesList.Items.Add(entryPanel);
+                }
+                catch
                 {
-                    Foreground = new SolidColorBrush(Colors.White),
-                    FontWeight = FontWeights.Bold,
-                    Text = entry.Token.Substring(0, entry.Token.IndexOf(".smc")),
-                    Margin = new Thickness(4)
-                };
-                var entryDate = new TextBlock()
-                {
-                    Foreground = new SolidColorBrush(Colors.White),
-                    Text = entry.Token.Substring(entry.Token.IndexOf(".smc") + 4),
-                    Margin = new Thickness(4)
-                };
-                entryPanel.Children.Add(entryName);
-                entryPanel.Children.Add(entryDate);
-                this.RecentFilesList.Items.Add(entryPanel);
+                    StorageApplicationPermissions.FutureAccessList.Remove(entry.Token);
+                }
             }
         }
 
@@ -133,10 +142,19 @@ namespace MyLecture
 
         private async void RecentFilesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var token = (this.RecentFilesList.SelectedItem as StackPanel).Tag.ToString();
-            
-            await lectureFactory.OpenExistingLecture(token);
-            this.Frame.Navigate(typeof(DrawingBoard), lectureFactory);
+            string token = (this.RecentFilesList.SelectedItem as StackPanel).Tag.ToString();
+
+            try
+            {
+                StorageFile file = await StorageApplicationPermissions.FutureAccessList.GetFileAsync(token);
+                await lectureFactory.OpenExistingLecture(token);
+                this.Frame.Navigate(typeof(DrawingBoard), lectureFactory);
+            }
+            catch
+            {
+                StorageApplicationPermissions.FutureAccessList.Remove(token);
+                this.showDialog("File Not Found", "Sorry, the file you chose has been moved or deleted.");
+            }
         }
     }
 }

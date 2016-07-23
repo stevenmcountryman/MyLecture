@@ -7,10 +7,6 @@ using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
 using Windows.UI.Input.Inking;
-using Windows.UI.ViewManagement;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using MyLecture.Views;
 
 namespace MyLecture.Models
 {
@@ -18,8 +14,9 @@ namespace MyLecture.Models
     {
         private IOReaderWriter ReaderWriter;
         private List<InkStrokeContainer> Slides;
-        private List<InkStrokeContainer> TempFiles;
-        private int tempFileIndex;
+        private List<InkStrokeContainer> UndoMemory;
+        private List<InkStrokeContainer> RedoMemory;
+        private InkStrokeContainer currentMemory;
         public string LectureName
         {
             get;
@@ -29,8 +26,9 @@ namespace MyLecture.Models
         public LectureFactory()
         {
             this.ReaderWriter = new IOReaderWriter();
-            this.TempFiles = new List<InkStrokeContainer>();
-            this.tempFileIndex = -1;
+            this.UndoMemory = new List<InkStrokeContainer>();
+            this.RedoMemory = new List<InkStrokeContainer>();
+            this.currentMemory = new InkStrokeContainer();
         }
 
         public void CreateNewLecture()
@@ -73,45 +71,47 @@ namespace MyLecture.Models
 
         public void ClearSnapshots()
         {
-            this.TempFiles.Clear();
-            this.tempFileIndex = 0;
+            this.UndoMemory.Clear();
+            this.RedoMemory.Clear();
+            this.currentMemory = new InkStrokeContainer();
         }
         public async void SaveSnapshot(InkStrokeContainer inkStrokes)
         {
-            this.tempFileIndex++;
-            if (this.TempFiles.Count() > 0)
-            {
-                this.TempFiles.RemoveRange(this.tempFileIndex, this.TempFiles.Count() - this.tempFileIndex);
-            }
+            this.UndoMemory.Add(this.currentMemory);
+            this.RedoMemory.Clear();
+
             if (inkStrokes.GetStrokes().Count() > 0)
             {
-                var tempFile = await this.ReaderWriter.SaveSnapshot(inkStrokes, this.tempFileIndex);
-                this.TempFiles.Add(tempFile);
+                this.currentMemory = await this.ReaderWriter.SaveSnapshot(inkStrokes, this.UndoMemory.Count - 1);
             }
             else
             {
-                this.TempFiles.Add(null);
+                this.currentMemory = new InkStrokeContainer();
             }
         }
         public bool CanGoBack()
         {
-            return tempFileIndex > -1;
+            return this.UndoMemory.Count > 0;
         }
         public bool CanGoForward()
         {
-            return this.tempFileIndex < this.TempFiles.Count() - 1;
+            return this.RedoMemory.Count > 0;
         }
         public InkStrokeContainer LoadPreviousSnapshot()
         {
-            this.tempFileIndex--;
-            if (tempFileIndex >= 0)
-            {
-                return this.TempFiles[this.tempFileIndex];
-            }
-            else
-            {
-                return null;
-            }
+            var inks = this.UndoMemory.Last();
+            this.UndoMemory.RemoveAt(this.UndoMemory.Count() - 1);
+            this.RedoMemory.Add(this.currentMemory);
+            this.currentMemory = inks;
+            return inks;
+        }
+        public InkStrokeContainer LoadNextSnapshot()
+        {
+            var inks = this.RedoMemory.Last();
+            this.RedoMemory.RemoveAt(this.RedoMemory.Count() - 1);
+            this.UndoMemory.Add(this.currentMemory);
+            this.currentMemory = inks;
+            return inks;
         }
         public void UpdateRecentFiles(string fileLocation)
         {
@@ -142,18 +142,6 @@ namespace MyLecture.Models
             else
             {
                 return new List<string>();
-            }
-        }
-        public InkStrokeContainer LoadNextSnapshot()
-        {
-            this.tempFileIndex++;
-            if (this.tempFileIndex < this.TempFiles.Count())
-            {
-                return this.TempFiles[this.tempFileIndex];
-            }
-            else
-            {
-                return null;
             }
         }
 
