@@ -389,22 +389,24 @@ namespace MyLecture.Views
         }
         private async void SlidesView_SaveButtonTapped(object sender, EventArgs e)
         {
-            if (await this.lectureFactory.SaveLectureAs(this.SlidesView.GetTitle()))
+            var result = await this.lectureFactory.SaveLectureAs(this.SlidesView.GetTitle());
+            if (result == LectureFactory.filePickerResult.SUCCESS)
             {
                 this.showDialog("Success", "Lecture saved successfully!");
             }
-            else
+            else if (result == LectureFactory.filePickerResult.FAILED)
             {
                 this.showDialog("Failure", "Error saving lecture. Try again.");
             }
         }
         private async void SlidesView_ExportButtonPressed(object sender, EventArgs e)
         {
-            if (await this.lectureFactory.ExportToImages(this.SlidesView.GetTitle()))
+            var result = await this.lectureFactory.ExportToImages(this.SlidesView.GetTitle());
+            if (result == LectureFactory.filePickerResult.SUCCESS)
             {
                 this.showDialog("Success", "Images saved successfully!");
             }
-            else
+            else if (result == LectureFactory.filePickerResult.FAILED)
             {
                 this.showDialog("Failure", "Error saving images. Try again.");
             }
@@ -502,11 +504,12 @@ namespace MyLecture.Views
 
         private async void SlidesView_ExportAsTextButtonPressed(object sender, EventArgs e)
         {
-            if (await this.lectureFactory.ExportToText(this.SlidesView.GetTitle()))
+            var result = await this.lectureFactory.ExportToText(this.SlidesView.GetTitle());
+            if (result == LectureFactory.filePickerResult.SUCCESS)
             {
                 this.showDialog("Success", "Text file saved successfully!");
             }
-            else
+            else if (result == LectureFactory.filePickerResult.FAILED)
             {
                 this.showDialog("Failure", "Error saving text. Try again.");
             }

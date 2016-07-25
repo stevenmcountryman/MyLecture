@@ -7,6 +7,7 @@ using Windows.Storage;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
 using Windows.UI.Input.Inking;
+using Windows.UI.Popups;
 
 namespace MyLecture.Models
 {
@@ -18,6 +19,12 @@ namespace MyLecture.Models
         private List<InkStrokeContainer> UndoMemory;
         private List<InkStrokeContainer> RedoMemory;
         private InkStrokeContainer currentMemory;
+        public enum filePickerResult
+        {
+            SUCCESS,
+            FAILED,
+            CANCELLED
+        }
         public string LectureName
         {
             get;
@@ -170,7 +177,7 @@ namespace MyLecture.Models
 
         }
 
-        public async Task<bool> SaveLectureAs(string titleText)
+        public async Task<filePickerResult> SaveLectureAs(string titleText)
         {
             try
             {
@@ -187,18 +194,22 @@ namespace MyLecture.Models
                 }
 
                 StorageFile file = await savePicker.PickSaveFileAsync();
+                if (file == null)
+                {
+                    return filePickerResult.CANCELLED;
+                }
                 string token = file.Name + file.DateCreated.UtcDateTime;
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace(token, file);
                 await this.ReaderWriter.SaveAllSlides(this.Slides, this.SlidesBackgroundWhite, token);
-                return true;
+                return filePickerResult.SUCCESS;
             }
             catch
             {
-                return false;
+                return filePickerResult.FAILED;
             }
         }
 
-        public async Task<bool> OpenExistingLecture()
+        public async Task<filePickerResult> OpenExistingLecture()
         {
             try
             {
@@ -206,16 +217,20 @@ namespace MyLecture.Models
                 openPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
                 openPicker.FileTypeFilter.Add(".smc");
                 StorageFile file = await openPicker.PickSingleFileAsync();
+                if (file == null)
+                {
+                    return filePickerResult.CANCELLED;
+                }
                 this.LectureName = file.Name.Replace(".smc", "");
                 string token = file.Name + file.DateCreated.UtcDateTime;
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace(token, file);
                 this.Slides = await this.ReaderWriter.OpenAllSlides(token);
                 this.SlidesBackgroundWhite = await this.ReaderWriter.OpenSlideConfig(token);
-                return true;
+                return filePickerResult.SUCCESS;
             }
             catch
             {
-                return false;
+                return filePickerResult.FAILED;
             }
         }
 
@@ -226,7 +241,7 @@ namespace MyLecture.Models
             this.SlidesBackgroundWhite = await this.ReaderWriter.OpenSlideConfig(token);
         }
 
-        public async Task<bool> ExportToImages(string title)
+        public async Task<filePickerResult> ExportToImages(string title)
         {
             try
             {
@@ -236,17 +251,21 @@ namespace MyLecture.Models
                 savePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
 
                 StorageFolder folder = await savePicker.PickSingleFolderAsync();
+                if (folder == null)
+                {
+                    return filePickerResult.CANCELLED;
+                }
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImagesFolderToken", folder);
                 await this.ReaderWriter.SaveAllSlidesToImages(this.Slides, this.SlidesBackgroundWhite, folder, title);
-                return true;
+                return filePickerResult.SUCCESS;
             }
             catch
             {
-                return false;
+                return filePickerResult.FAILED;
             }
         }
 
-        public async Task<bool> ExportToText(string titleText)
+        public async Task<filePickerResult> ExportToText(string titleText)
         {
             try
             {
@@ -263,14 +282,18 @@ namespace MyLecture.Models
                 }
 
                 StorageFile file = await savePicker.PickSaveFileAsync();
+                if (file == null)
+                {
+                    return filePickerResult.CANCELLED;
+                }
                 string token = file.Name + file.DateCreated.UtcDateTime;
                 StorageApplicationPermissions.FutureAccessList.AddOrReplace(token, file);
                 await this.ReaderWriter.SaveAllSlidesToText(this.Slides, token);
-                return true;
+                return filePickerResult.SUCCESS;
             }
             catch
             {
-                return false;
+                return filePickerResult.FAILED;
             }
         }
 

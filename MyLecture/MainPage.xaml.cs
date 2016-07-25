@@ -124,11 +124,12 @@ namespace MyLecture
         private async void OpenLectureButton_Click(object sender, RoutedEventArgs e)
         {
             lectureFactory = new LectureFactory();
-            if (await lectureFactory.OpenExistingLecture())
+            var openResult = await lectureFactory.OpenExistingLecture();
+            if (openResult == LectureFactory.filePickerResult.SUCCESS)
             {
                 this.Frame.Navigate(typeof(DrawingBoard), lectureFactory);
             }
-            else
+            else if (openResult == LectureFactory.filePickerResult.FAILED)
             {
                 this.showDialog("Failure", "Error opening lecture file. Try again");
             }
