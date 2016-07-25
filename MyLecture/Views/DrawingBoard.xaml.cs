@@ -134,10 +134,10 @@ namespace MyLecture.Views
             this.lectureFactory.ClearSnapshots();
             this.resetSnapshotMemory();
         }
-        private void updateInkCanvasAndTools()
+        private async void updateInkCanvasAndTools()
         {
             this.lastTool = this.MainInkToolbar.ActiveTool;
-            this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+            await this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
             this.saveSlide();
             this.resetSnapshotMemory();
         }
@@ -348,7 +348,7 @@ namespace MyLecture.Views
             this.openSlidesView();
             this.SlidesView.SlidesClosed += SlidesView_SlidesClosed;
         }
-        private void SlidesView_ChooseSlide(object sender, EventArgs e)
+        private async void SlidesView_ChooseSlide(object sender, EventArgs e)
         {
             this.clearCanvas();
             var chosenSlide = this.lectureFactory.GetSlideAt(this.SlidesView.SlideIndex);
@@ -361,7 +361,8 @@ namespace MyLecture.Views
             {
                 this.InkPanel.Background = this.blackColor;
             }
-            this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+            await this.lectureFactory.SaveSnapshotBase(this.MainCanvas.InkPresenter.StrokeContainer);
+            this.resetSnapshotMemory();
             this.closeSlidesView();
         }
         private void SlidesView_CreateNewSlide(object sender, EventArgs e)
@@ -369,7 +370,6 @@ namespace MyLecture.Views
             this.clearCanvas();
             var newSlide = this.lectureFactory.AddNewBlankSlide();
             this.MainCanvas.InkPresenter.StrokeContainer = newSlide;
-            this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
             this.closeSlidesView();
         }
         private void openSlidesView()
@@ -411,7 +411,7 @@ namespace MyLecture.Views
                 this.showDialog("Failure", "Error saving images. Try again.");
             }
         }
-        private void SlidesView_SlideDeleted(object sender, EventArgs e)
+        private async void SlidesView_SlideDeleted(object sender, EventArgs e)
         {
             this.lectureFactory.DeleteSlide(this.SlidesView.SlideIndexToModify);
             this.clearCanvas();
@@ -419,13 +419,15 @@ namespace MyLecture.Views
             {
                 var chosenSlide = this.lectureFactory.GetSlideAt(this.SlidesView.SlideIndex);
                 this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
-                this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+                await this.lectureFactory.SaveSnapshotBase(this.MainCanvas.InkPresenter.StrokeContainer);
+                this.resetSnapshotMemory();
             }
             else if (this.lectureFactory.GetAllSlides().Count == 1)
             {
                 var chosenSlide = this.lectureFactory.GetSlideAt(0);
                 this.MainCanvas.InkPresenter.StrokeContainer = chosenSlide;
-                this.lectureFactory.SaveSnapshot(this.MainCanvas.InkPresenter.StrokeContainer);
+                await this.lectureFactory.SaveSnapshotBase(this.MainCanvas.InkPresenter.StrokeContainer);
+                this.resetSnapshotMemory();
             }
             else
             {

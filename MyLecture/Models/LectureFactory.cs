@@ -88,14 +88,28 @@ namespace MyLecture.Models
             this.RedoMemory.Clear();
             this.currentMemory = new InkStrokeContainer();
         }
-        public async void SaveSnapshot(InkStrokeContainer inkStrokes)
+        public async Task SaveSnapshot(InkStrokeContainer inkStrokes)
         {
             this.UndoMemory.Add(this.currentMemory);
             this.RedoMemory.Clear();
 
             if (inkStrokes.GetStrokes().Count() > 0)
             {
-                this.currentMemory = await this.ReaderWriter.SaveSnapshot(inkStrokes, this.UndoMemory.Count - 1);
+                this.currentMemory = await this.ReaderWriter.SaveSnapshot(inkStrokes);
+            }
+            else
+            {
+                this.currentMemory = new InkStrokeContainer();
+            }
+        }
+        public async Task SaveSnapshotBase(InkStrokeContainer inkStrokes)
+        {
+            this.UndoMemory.Clear();
+            this.RedoMemory.Clear();
+
+            if (inkStrokes.GetStrokes().Count() > 0)
+            {
+                this.currentMemory = await this.ReaderWriter.SaveSnapshot(inkStrokes);
             }
             else
             {

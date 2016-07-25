@@ -22,7 +22,7 @@ namespace MyLecture.IO
         readonly static string SAVEFOLDER = "Save";
         readonly static string SLIDEFILE = "Slide.ink";
         readonly static string SLIDESAVEFILE = "Slide{0}.ink";
-        readonly static string TEMPFILE = "Temp{0}.ink";
+        readonly static string TEMPFILE = "Temp.ink";
         readonly static string IMAGEFILE = "Slide{0}.jpg";
         private StorageFolder LectureFolder;
         private StorageFolder TempFolder;
@@ -182,11 +182,10 @@ namespace MyLecture.IO
             }
             return slideBackgroundWhite;
         }
-        public async Task<InkStrokeContainer> SaveSnapshot(InkStrokeContainer inkStrokes, int index)
+        public async Task<InkStrokeContainer> SaveSnapshot(InkStrokeContainer inkStrokes)
         {
-            var fileName = string.Format(TEMPFILE, index);
-            await this.saveInkStrokesToFile(inkStrokes, fileName, this.TempFolder);
-            return await this.loadInkStrokesFromFile(fileName, this.TempFolder);
+            await this.saveInkStrokesToFile(inkStrokes, TEMPFILE, this.TempFolder);
+            return await this.loadInkStrokesFromFile(TEMPFILE, this.TempFolder);
         }
         public async Task<InkStrokeContainer> SaveSlide(InkStrokeContainer inkStrokes)
         {
