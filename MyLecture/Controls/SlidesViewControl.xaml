@@ -95,23 +95,18 @@
                         RelativePanel.AlignBottomWith="SlidesText"
                         RelativePanel.AlignRightWithPanel="True"
                         Tapped="SaveButton_Tapped"/>
-            <GridView x:Name="SlidesGrid" 
+            <ListView x:Name="SlidesGrid" 
                       Margin="24,12,24,12"
                       ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      RelativePanel.Below="SlidesText"
-                      RelativePanel.Above="ExportAsImagesButton"
-                      DragItemsStarting="SlidesGrid_DragItemsStarting">
-            </GridView>
-            <!--<GridView x:Name="SlidesGrid" 
-                      Margin="24,12,24,12"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      VerticalAlignment="Stretch"
+                      HorizontalAlignment="Stretch"
                       RelativePanel.Below="SlidesText"
                       RelativePanel.Above="ExportAsImagesButton"
                       ReorderMode="Enabled"
                       CanDragItems="True"
                       AllowDrop="True"
                       DragItemsStarting="SlidesGrid_DragItemsStarting">
-            </GridView>-->
+            </ListView>
             <TextBlock x:Name="ExportAsImagesButton"
                        Text="save as images"
                        Margin="24,24,24,4"

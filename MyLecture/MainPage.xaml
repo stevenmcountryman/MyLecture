@@ -8,6 +8,25 @@
     mc:Ignorable="d">
 
     <Grid Background="#FF595959">
+        <StackPanel VerticalAlignment="Top"
+                    HorizontalAlignment="Left"
+                    Width="200"
+                    Height="400">
+            <TextBlock x:Name="ConnectText"
+                   Text="control remote lecture"
+                   Foreground="#FF00C57D"
+                   Margin="4"
+                   Tapped="TextBlock_Tapped">
+            </TextBlock>
+            <ListView x:Name="DevicesList"
+                      SelectionChanged="DevicesList_SelectionChanged">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DisplayName}"/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>        
         <StackPanel VerticalAlignment="Bottom">
             <TextBlock Text="Recent Lectures: "
                        Foreground="White"

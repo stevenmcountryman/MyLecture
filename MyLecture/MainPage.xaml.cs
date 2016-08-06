@@ -12,6 +12,9 @@ using Windows.UI.ViewManagement;
 using Windows.Foundation.Metadata;
 using Windows.Storage.AccessCache;
 using Windows.UI.Text;
+using Windows.System.RemoteSystems;
+using System.Collections.Generic;
+using Windows.System;
 
 namespace MyLecture
 {
@@ -157,6 +160,50 @@ namespace MyLecture
             {
                 StorageApplicationPermissions.FutureAccessList.Remove(token);
                 this.showDialog("File Not Found", "Sorry, the file you chose has been moved or deleted.");
+            }
+        }
+        private RemoteSystemWatcher deviceWatcher;
+        private async void TextBlock_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            this.DevicesList.Items.Clear();
+            await RemoteSystem.RequestAccessAsync();
+            deviceWatcher = RemoteSystem.CreateWatcher();
+            deviceWatcher.RemoteSystemAdded += DeviceWatcher_RemoteSystemAdded;
+            deviceWatcher.Start();
+        }
+
+        private async void DeviceWatcher_RemoteSystemAdded(RemoteSystemWatcher sender, RemoteSystemAddedEventArgs args)
+        {
+            var remoteSystem = args.RemoteSystem;
+            await this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                if (!this.DevicesList.Items.Contains(remoteSystem))
+                {
+                    this.DevicesList.Items.Add(remoteSystem);
+                }
+            });
+        }
+
+        private async void DevicesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedDevice = this.DevicesList.SelectedItem as RemoteSystem;
+
+            if (selectedDevice != null)
+            {
+                Uri uri;
+                if (Uri.TryCreate("www.westga.edu", UriKind.Absolute, out uri))
+                {
+
+                    // Launch URI on the remote device. 
+                    // Note: LaunchUriAsync needs to called from the UI thread.
+                    RemoteLaunchUriStatus launchUriStatus = await RemoteLauncher.LaunchUriAsync(new RemoteSystemConnectionRequest(selectedDevice), uri);
+                }
+                else
+                {
+                }
+            }
+            else
+            {
             }
         }
     }
